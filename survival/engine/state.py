@@ -25,23 +25,36 @@ class GameState:
             return{"ok": False, "rejected":["game is over"]}
 
         rejected= []
+        temp_inventory = list(self.inventory)
+        for item in remove_items:
+            if item in temp_inventory:
+                temp_inventory.remove(item)
+            else:
+                rejected.append(f"cannot remove '{item}': not in inventory")
+
+        temp_injuries = list(self.injuries)
+        for injury in heal_injuries:
+            if injury in temp_injuries:
+                temp_injuries.remove(injury)
+            else:
+                rejected.append(f"cannot heal '{injury}': not injured")
+
+
+        if rejected:
+            return {"ok": False, "turn": self.turn, "rejected":rejected}
+
         health_before, sanity_before = self.health, self.sanity
 
         self.health = clamp(self.health + health_delta)
         self.sanity = clamp(self.sanity + sanity_delta)
 
         for item in remove_items:
-            if item in self.inventory:
-                self.inventory.remove(item)
-            else:
-                rejected.append(f"cannot remove '{item}': not in inventory")
+
+         self.inventory.remove(item)
         self.inventory.extend(add_items)
 
         for injury in heal_injuries:
-            if injury in self.injuries:
-                self.injuries.remove(injury)
-            else:
-                rejected.append(f"cannot remove'{injury}': not injured")
+            self.injuries.remove(injury)
 
         for injury in add_injuries:
             if injury not in self.injuries:

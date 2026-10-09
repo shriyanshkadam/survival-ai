@@ -24,3 +24,18 @@ def test_death_blocks_further_changes():
     result = s.apply(health_delta=50)
     assert result["ok"] is False
     assert s.health == 0
+
+# More basic tests for reworked state
+
+def test_rejected_action_changes_nothing_costs_no_turn():
+    s = GameState()
+    result = s.apply(health_delta=-20, remove_items=["rope"])
+    assert result["ok"] is False
+    assert s.health == 100
+    assert s.turn == 0
+
+def test_removing_same_item_twice_with_one_copy_is_rejected():
+    s = GameState(inventory=["rope"])
+    result = s.apply(remove_items=["rope", "rope"])
+    assert result["ok"] is False
+    assert s.inventory == ["rope"]
