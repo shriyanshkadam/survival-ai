@@ -1,0 +1,2 @@
+DECISION 1 : rejected actions don't cost a turn, because anyone can make innocent mistakes they should not be punished for it.
+DECISION 2 : Repeated attempts to jailbreak will be detected by a detector which looks for active jailbreak attempts, meanwhile repeated innocent mistakes only triggers hints on how the interface works (NOT IMPLEMENTED YET)

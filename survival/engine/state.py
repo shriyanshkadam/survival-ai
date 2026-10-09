@@ -72,7 +72,28 @@ class GameState:
             "rejected": rejected,
             "phase": self.phase.value,
         }
-    
+    def to_dict(self):
+        return {
+            "health": self.health,
+            "sanity": self.sanity,
+            "injuries": list(self.injuries),
+            "inventory": list(self.inventory),
+            "turn": self.turn,
+            "phase": self.phase.value,
+            
+        }
+
+    @classmethod
+    def from_dict(cls, data):
+        return cls(
+            health = data["health"],
+            sanity = data["sanity"],
+            injuries = list(data["injuries"]),
+            inventory = list(data["inventory"]),
+            turn = data["turn"],
+            phase = Phase(data["phase"]),
+        )
+
 
 
             
