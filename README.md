@@ -21,18 +21,6 @@ To mitigate context window decay and long-term retention limits inherent in AI m
 
 5) Softlock Prevention: Test edge cases to ensure scenario progression remains possible and softlocks are avoided.
 
-## RoadMap
-Project structure, tests, Git workflow (Completed)
-Game state with validated updates (`engine/state.py`) (Completed)
-Event log
-Rules and dice
-Scenario generator
-LLM action parser and narrator
-Web interface
-Automated playtester
-Anti-jailbreak guard
-
-
 ## Run it
 ```
 python -m venv .venv
