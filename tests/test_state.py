@@ -58,3 +58,49 @@ def test_to_dict_returns_copy():
     d = s.to_dict()
     d["inventory"].append("knife")
     assert s.inventory == ["rope"]
+
+
+def test_big_item_does_not_fit():
+    s = GameState(capacity=4)
+    result = s.apply(add_items=["spear"], new_item_sizes={"spear": "large"})
+    assert result["ok"] is False
+    assert s.inventory == []
+
+
+def test_small_items_fit():
+    s = GameState(capacity=2)
+    result = s.apply(add_items=["stick", "stick"], new_item_sizes={"stick": "small"})
+    assert result["ok"] is True
+
+
+def test_swapping_at_full_capacity_is_allowed():
+    s = GameState(capacity=1, inventory=["stick"], item_sizes={"stick": 1})
+    result = s.apply(remove_items=["stick"], add_items=["pebble"],
+                     new_item_sizes={"pebble": "tiny"})
+    assert result["ok"] is True
+    assert s.inventory == ["pebble"]
+
+def test_unknown_item_without_size_is_rejected():
+    s = GameState()
+    result = s.apply(add_items=["rope"])
+    assert result["ok"] is False
+
+
+def test_declaring_a_size_registers_it():
+    s = GameState()
+    result = s.apply(add_items=["rope"], new_item_sizes={"rope": "small"})
+    assert result["ok"] is True
+    assert s.item_sizes == {"rope": 1}
+
+
+def test_size_cannot_be_changed_once_set():
+    s = GameState()
+    s.apply(add_items=["rope"], new_item_sizes={"rope": "small"})
+    result = s.apply(add_items=["rope"], new_item_sizes={"rope": "large"})
+    assert result["ok"] is False
+
+
+def test_round_trip_keeps_capacity_and_sizes():
+    s = GameState(capacity=7)
+    s.apply(add_items=["rope"], new_item_sizes={"rope": "small"})
+    assert GameState.from_dict(s.to_dict()) == s
