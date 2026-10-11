@@ -11,7 +11,8 @@ INJURY_SEVERITY = {
     "minor": (1,10),
     "moderate": (11,20),
     "major": (21,40),
-    "lethal": (41,100),
+    "critical": (41,99),
+    "lethal": (100,100),
 }
 
 SIZE_CLASSES = {
@@ -20,4 +21,11 @@ SIZE_CLASSES = {
     "medium": 3,
     "large": 5,
     "huge": 7,
+}
+
+RISK_FAIL_CHANCE = {
+    "none": 0.0,
+    "low": 0.1,
+    "medium": 0.3,
+    "high": 0.6,
 }
