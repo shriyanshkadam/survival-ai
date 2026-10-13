@@ -22,7 +22,7 @@ def resolve(state, intent, rng):
     if intent.harm not in INJURY_SEVERITY:
         rejected.append(f"unknown harm tier'{intent.harm}'")
     if rejected:
-        return {"ok": False, "turn": state.turn, "rejected":rejected}
+        return {"ok": False, "turn": state.turn, "rejected":rejected, "outcome": "rejected"}
 
     failed = rng.random() < RISK_FAIL_CHANCE[intent.risk]
 

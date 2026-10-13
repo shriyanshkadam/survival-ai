@@ -11,6 +11,7 @@ class Event:
     state_before: dict
     state_after: dict
     narrative: str = ""
+    outcome: str = ""
 
 class EventLog:
     def __init__(self):

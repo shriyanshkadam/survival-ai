@@ -9,6 +9,7 @@ class Scenario:
     setting: str
     cause: str
     state: GameState
+    outcome: str = ""
 
 def roll_scenario(rng):
     character = rng.choice(list(CHARACTERS))
