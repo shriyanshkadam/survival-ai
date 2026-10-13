@@ -34,3 +34,7 @@ v0 (single-file prototype, Llama-3 + LoRA + RAG): [Will Add later]
 
 ## Design decisions
 See [DECISIONS.md](DECISIONS.md).
+
+
+## DEVELOPER NOTE
+scenario_data.py currently has few scenario block, will add many more later.

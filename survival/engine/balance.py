@@ -1,4 +1,8 @@
 HAND_CAPACITY  = 2
+MIN_START_HEALTH = 30
+START_SANITY = (55,95)
+MAX_START_INJURIES = 4
+START_INJURY_WEIGHTS =  {"minor": 5, "moderate": 3, "major": 1}
 
 CARRY_CAPACITY = {
     "big bag": (8,12),
