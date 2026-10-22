@@ -21,3 +21,8 @@ def test_every_scenario_has_legal_start():
         assert all(item in s.item_sizes for item in s.inventory)
         assert s.phase == Phase.PLAYING
         assert s.turn == 0
+
+def test_start_hour_in_range():
+    import random
+    sc = roll_scenario(random.Random(1))
+    assert 0 <= sc.start_hour <= 23

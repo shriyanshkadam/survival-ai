@@ -12,6 +12,7 @@ def build_system_prompt():
         "Fields: description (string); requires (items the player must hold and keeps); "
         "consumes (items used up); produces (items created); "
         "new_item_sizes (object mapping each new item name to a size class); "
+        "minutes (whole number of minutes the action realistically takes, e.g. eating 5, searching an area 45, sleeping 360); "
 
         f"risk (one of {list(RISK_FAIL_CHANCE)}); "
         f"harm (one of {list(INJURY_SEVERITY)}); "

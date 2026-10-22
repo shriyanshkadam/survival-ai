@@ -9,6 +9,7 @@ class Scenario:
     setting: str
     cause: str
     state: GameState
+    start_hour: int = 12
 
 
 def roll_scenario(rng):
@@ -22,6 +23,8 @@ def roll_scenario(rng):
 
     inventory= list(kit["items"])
     item_sizes = {name: SIZE_CLASSES[size] for name, size in kit["items"].items()}
+
+
 
     injuries= []
     damage = 0
@@ -43,6 +46,7 @@ def roll_scenario(rng):
         health=health, sanity=sanity, injuries=injuries, inventory=inventory,
         capacity=capacity, item_sizes=item_sizes,
     )
-    return Scenario(character, setting, cause, state)
+    start_hour = rng.randint(0, 23)
+    return Scenario(character, setting, cause, state, start_hour)
 
 

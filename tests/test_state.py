@@ -104,3 +104,10 @@ def test_round_trip_keeps_capacity_and_sizes():
     s = GameState(capacity=7)
     s.apply(add_items=["rope"], new_item_sizes={"rope": "small"})
     assert GameState.from_dict(s.to_dict()) == s
+
+def test_minutes_added_only_on_success():
+    s = GameState()
+    s.apply(minutes=45)
+    assert s.elapsed_minutes == 45
+    s.apply(remove_items=["ghost"], minutes=45)
+    assert s.elapsed_minutes == 45

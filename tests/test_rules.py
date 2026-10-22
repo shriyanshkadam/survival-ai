@@ -95,3 +95,20 @@ def test_damage_stays_in_severity_range():
         result = resolve(s, intent, random.Random(seed))
         if result["outcome"] == "failure":
             assert 90<= s.health <= 99
+
+def test_minutes_are_clamped():
+    import random
+    from survival.engine.rules import Intent, resolve
+    from survival.engine.state import GameState
+    s = GameState()
+    resolve(s, Intent(description="sleep", minutes=99999), random.Random(1))
+    assert s.elapsed_minutes == 480
+
+
+def test_bad_minutes_fall_back():
+    import random
+    from survival.engine.rules import Intent, resolve
+    from survival.engine.state import GameState
+    s = GameState()
+    resolve(s, Intent(description="wait", minutes="a while"), random.Random(1))
+    assert s.elapsed_minutes == 30

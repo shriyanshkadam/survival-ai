@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Survival AI</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main id="screen">
+    <section id="story">
+      <div id="header"></div>
+      <div id="log"></div>
+      <form id="turn-form">
+        <input id="action" type="text" maxlength="300" placeholder="What do you do?" autocomplete="off">
+        <button type="submit">Act</button>
+      </form>
+    </section>
+
+    <aside id="hud">
+      <p class="label">Clock</p>
+      <p id="clock"></p>
+      <p class="label">Health</p>
+      <div class="bar"><div id="health-bar"></div></div>
+      <p class="label">Sanity</p>
+      <div class="bar"><div id="sanity-bar"></div></div>
+      <p class="label">Injuries</p>
+      <p id="injuries"></p>
+      <p class="label" id="pack-label">Pack</p>
+      <div id="pack"></div>
+      <p class="label">Nearby</p>
+      <p id="nearby"></p>
+    </aside>
+  </main>
+  <script src="/static/app.js"></script>
+</body>
+</html>

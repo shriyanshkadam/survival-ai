@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
-from survival.engine.balance import RISK_FAIL_CHANCE, INJURY_SEVERITY
+from survival.engine.balance import RISK_FAIL_CHANCE, INJURY_SEVERITY, DEFAULT_MINUTES, MIN_MINUTES, MAX_MINUTES
+from survival.engine.state import clamp
 
 @dataclass
 class Intent:
@@ -11,6 +12,7 @@ class Intent:
     risk: str ="none"
     harm: str = "minor"
     injury: str=""
+    minutes: int = DEFAULT_MINUTES
 
 def resolve(state, intent, rng):
     rejected = []
@@ -23,19 +25,24 @@ def resolve(state, intent, rng):
         rejected.append(f"unknown harm tier'{intent.harm}'")
     if rejected:
         return {"ok": False, "turn": state.turn, "rejected":rejected, "outcome": "rejected"}
-
+    try:
+        minutes = int(intent.minutes)
+    except (TypeError, ValueError):
+        minutes = DEFAULT_MINUTES
+    minutes = clamp(minutes, MIN_MINUTES, MAX_MINUTES)
     failed = rng.random() < RISK_FAIL_CHANCE[intent.risk]
 
     if failed:
         low, high = INJURY_SEVERITY[intent.harm]
         damage = rng.randint(low, high)
         injuries = [intent.injury] if intent.injury else []
-        result = state.apply(health_delta=-damage, add_injuries= injuries)
+        result = state.apply(health_delta=-damage, add_injuries= injuries, minutes=minutes)
     else:
         result = state.apply(
             remove_items= intent.consumes,
             add_items= intent.produces,
             new_item_sizes= intent.new_item_sizes,
+            minutes=minutes,
         )
 
     if not result["ok"]:
