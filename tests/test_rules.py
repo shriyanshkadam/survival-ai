@@ -112,3 +112,10 @@ def test_bad_minutes_fall_back():
     s = GameState()
     resolve(s, Intent(description="wait", minutes="a while"), random.Random(1))
     assert s.elapsed_minutes == 30
+
+def test_harm_ignored_when_risk_is_none():
+    import random
+    from survival.engine.rules import Intent, resolve
+    from survival.engine.state import GameState
+    r = resolve(GameState(), Intent(description="sleep", harm="none"), random.Random(1))
+    assert r["ok"] is True

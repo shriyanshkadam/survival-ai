@@ -10,6 +10,7 @@ from pathlib import Path
 
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from survival.pipeline.narrator import fallback_opening, narrate_opening
 
 load_dotenv()
 
@@ -45,12 +46,17 @@ def ping():
 def new_game():
     game_id = secrets.token_hex(8)
     game = Game(secrets.randbits(32))
-    games[game_id]= game
+    games[game_id] = game
     s = game.scenario
+    try:
+        opening = narrate_opening(llm, game)
+    except RuntimeError:
+        opening = fallback_opening(game)
     return {
         "game_id": game_id,
         "scenario": {"character": s.character, "setting": s.setting, "cause": s.cause},
         "state": snapshot(game),
+        "opening": opening,
     }
 
 @app.post("/api/turn")
@@ -65,6 +71,7 @@ def take_turn(req: TurnRequest):
         raise HTTPException(status_code=400, detail="That action is too long.")
     try:
         out = play_text(game, llm, text)
+        if game.log.events: print("INTENT:", game.log.events[-1].changes, game.log.events[-1].rejected) 
     except RuntimeError:
         raise HTTPException(status_code=502, detail="The simulator hit a problem. Try again.")
     return {

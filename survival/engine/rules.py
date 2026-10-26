@@ -21,7 +21,7 @@ def resolve(state, intent, rng):
             rejected.append(f"missing required item '{item}'")
     if intent.risk not in RISK_FAIL_CHANCE:
         rejected.append(f"unknown risk level'{intent.risk}'")
-    if intent.harm not in INJURY_SEVERITY:
+    if intent.risk != "none" and intent.harm not in INJURY_SEVERITY:
         rejected.append(f"unknown harm tier'{intent.harm}'")
     if rejected:
         return {"ok": False, "turn": state.turn, "rejected":rejected, "outcome": "rejected"}

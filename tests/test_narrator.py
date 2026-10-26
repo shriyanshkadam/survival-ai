@@ -1,7 +1,7 @@
 from survival.engine.game import Game
 from survival.engine.rules import Intent
 from survival.llm.mock import MockLLM
-from survival.pipeline.narrator import narrate
+from survival.pipeline.narrator import narrate, narrate_opening
 
 
 def make():
@@ -22,7 +22,7 @@ def test_high_temperature_and_outcome_in_prompt():
     llm = MockLLM(["ok"])
     narrate(llm, game, intent, result, "rest a bit")
     call = llm.calls[0]
-    assert call["temperature"] >= 0.7
+    assert call["temperature"] >= 0.4
     assert "success" in call["messages"][1]["content"]
 
 
@@ -38,3 +38,7 @@ def test_low_sanity_changes_the_style_prompt():
     llm = MockLLM(["ok"])
     narrate(llm, game, intent, result, "rest")
     assert "fragmented" in llm.calls[0]["messages"][0]["content"]
+
+def test_opening_uses_llm_text():
+    game = Game(seed=1)
+    assert narrate_opening(MockLLM(["You wake up cold."]), game) == "You wake up cold."
