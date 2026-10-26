@@ -4,7 +4,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from survival.engine.clock import hour_at, phase_of_day
 from survival.engine.game import Game
-from survival.llm.groq_llm import GroqLLM
+from survival.llm.factory import build_llm
 from survival.pipeline.turn import play_text
 from pathlib import Path
 
@@ -15,7 +15,7 @@ from survival.pipeline.narrator import fallback_opening, narrate_opening
 load_dotenv()
 
 app = FastAPI()
-llm = GroqLLM()
+llm = build_llm()
 games = {}
 STATIC_DIR = Path(__file__).parent / "static"
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
@@ -71,6 +71,7 @@ def take_turn(req: TurnRequest):
         raise HTTPException(status_code=400, detail="That action is too long.")
     try:
         out = play_text(game, llm, text)
+        print("LLM:", llm.last_used)
         if game.log.events: print("INTENT:", game.log.events[-1].changes, game.log.events[-1].rejected) 
     except RuntimeError:
         raise HTTPException(status_code=502, detail="The simulator hit a problem. Try again.")
