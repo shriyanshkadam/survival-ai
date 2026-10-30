@@ -38,3 +38,6 @@ See [DECISIONS.md](DECISIONS.md).
 
 ## DEVELOPER NOTE
 scenario_data.py currently has few scenario block, will add many more later.
+
+## TOOLS USED
+In this project, I used Claude(Sonnet 5.5) as a pair programmer and a tutor, though I still have full comprehension of the codebase, and all the creative and architectural decisions were made by me. Claude was only used for complex code assistance.
