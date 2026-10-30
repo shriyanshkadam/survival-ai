@@ -26,3 +26,12 @@ def test_start_hour_in_range():
     import random
     sc = roll_scenario(random.Random(1))
     assert 0 <= sc.start_hour <= 23
+
+def test_start_needs_vary():
+    import random
+    seen = set()
+    for seed in range(30):
+        sc = roll_scenario(random.Random(seed))
+        assert 0 <= sc.state.food <= 100
+        seen.add((sc.state.food, sc.state.water))
+    assert len(seen) > 5

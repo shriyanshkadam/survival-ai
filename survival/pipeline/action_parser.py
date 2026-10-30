@@ -12,6 +12,8 @@ def build_system_prompt():
         "Fields: description (string); requires (items the player must hold and keeps); "
         "consumes (items used up); produces (items created); "
         "new_item_sizes (object mapping each new item name to a size class); "
+         "ingests (short plain name of what the player eats or drinks, like 'energy bar', 'water', 'snow', 'berries'; otherwise empty); "
+        "only when the player eats or drinks something that is used up); "
         "minutes (whole number of minutes the action realistically takes, e.g. eating 5, searching an area 45, sleeping 360); "
 
         f"risk (one of {list(RISK_FAIL_CHANCE)}); "
@@ -20,8 +22,9 @@ def build_system_prompt():
         f"Size classes: {list(SIZE_CLASSES)}.\n"
 
         "Rules: use the exact inventory name when the player has an item. "
-        "requires lists the tools or materials a normal person needs for this action; "
-        "list them even if the player does not carry them, because the game checks. "
+        "requires lists only a tool without which the action is impossible, such as a lighter or matches for a fire or a knife for cutting. "
+        "If the player lacks that tool, still list it, because the game checks. "
+        "Never require tools for foraging, catching small things by hand, eating or drinking, and never invent tools the player did not mention. "
         "Example: lighting a fire needs a matchbox or lighter; if the player has neither, require 'matchbox'. "
         "consumes may only name items in the inventory. "
         "produces lists only solid objects the player can carry that are truly made or collected "
@@ -36,6 +39,12 @@ def build_system_prompt():
         "Use low for ordinary tasks, medium for tasks made harder by cold, wind, darkness, "
         "injury or missing tools, and high for dangerous things. "
         "Lighting a fire outdoors in wind, snow or rain is medium. "
+        "When the player eats or drinks, set ingests. "
+        "If they carry it, list it in consumes too; drinking from a water bottle consumes 'water bottle' "
+        "and produces 'empty bottle' with size small. "
+        "If they search for or find it, leave consumes empty. "
+        "Searching for food or water takes about 45 minutes and is low risk. "
+        "Never set ingests for things that are not food or drink. "
     )
 
 def build_messages(player_text, state):
@@ -65,6 +74,9 @@ def check_types(data):
         value = data.get(name, [])
         if not isinstance( value, list) or not all(isinstance(x, str) for x in value):
             raise ValueError(f"{name} must be a list of strings")
+    restores = data.get("restores", {})
+    if not isinstance(data.get("ingests", ""), str):
+        raise ValueError("ingests must be a string")
     sizes = data.get("new_item_sizes", {})
     if not isinstance(sizes, dict):
         raise ValueError("new_item_sizes must be an object")

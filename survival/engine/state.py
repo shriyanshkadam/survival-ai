@@ -22,13 +22,17 @@ class GameState:
     capacity: int = 10
     item_sizes: dict[str, float] = field(default_factory=dict)
     elapsed_minutes: int = 0
+    food: float = 100.0
+    water: float = 100.0
+    warmth: float = 100.0
 
     def used_space(self):
         return sum(self.item_sizes.get(item,1) for item in self.inventory)
 
     def apply(self, health_delta= 0, sanity_delta= 0,
               add_items=(), remove_items=(),
-              add_injuries=(), heal_injuries=(), new_item_sizes=None, minutes=0):
+              add_injuries=(), heal_injuries=(), new_item_sizes=None, minutes=0,
+              food_delta=0, water_delta=0, warmth_delta=0):
         
         if self.phase != Phase.PLAYING:
             return{"ok": False, "rejected":["game is over"]}
@@ -76,6 +80,9 @@ class GameState:
 
         self.health = clamp(self.health + health_delta)
         self.sanity = clamp(self.sanity + sanity_delta)
+        self.food = clamp(self.food + food_delta)
+        self.water = clamp(self.water + water_delta)
+        self.warmth = clamp(self.warmth + warmth_delta)
 
         self.item_sizes.update(pending)
         for item in remove_items:
@@ -101,6 +108,7 @@ class GameState:
             "sanity": (sanity_before, self.sanity),
             "rejected": rejected,
             "phase": self.phase.value,
+            "needs": {"food": self.food, "water": self.water, "warmth": self.warmth},
         }
     def to_dict(self):
         return {
@@ -113,6 +121,9 @@ class GameState:
             "capacity": self.capacity,
             "item_sizes": dict(self.item_sizes),
             "elapsed_minutes": self.elapsed_minutes,
+            "food": self.food,
+            "water": self.water,
+            "warmth": self.warmth,
         }
 
     @classmethod
@@ -127,6 +138,9 @@ class GameState:
             capacity= data["capacity"],
             item_sizes= dict(data["item_sizes"]),
             elapsed_minutes= data.get("elapsed_minutes", 0),
+            food= data.get("food", 100.0),
+            water= data.get("water", 100.0),
+            warmth= data.get("warmth", 100.0),
             )
 
 

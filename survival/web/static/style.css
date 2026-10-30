@@ -103,9 +103,12 @@ button:hover { border-color: var(--text); }
 #clock, #injuries, #nearby { margin: 0; }
 
 .bar { height: 8px; background: #15181e; border-radius: 2px; overflow: hidden; }
-#health-bar, #sanity-bar { height: 100%; width: 100%; transition: width 0.3s; }
+#health-bar, #sanity-bar, #food-bar, #water-bar, #warmth-bar { height: 100%; width: 100%; transition: width 0.3s; }
 #health-bar { background: var(--health); }
 #sanity-bar { background: var(--sanity); }
+#food-bar { background: #c9a23a; }
+#water-bar { background: #4aa3c9; }
+#warmth-bar { background: #d9783a; }
 
 #pack { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { border: 1px solid var(--line); border-radius: 4px; padding: 2px 8px; font-size: 12px; }

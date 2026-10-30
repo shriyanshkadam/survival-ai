@@ -24,3 +24,13 @@ START_INJURIES = {
     "moderate": ["deep thigh cut", "twisted ankle"],
     "major": ["broken forearm", "concussion"],
 }
+
+CAUSE_HOURS_OUT = {
+    "wandered off-trail": (2, 10),
+    "vehicle breakdown": (1, 6),
+    "sudden storm": (1, 5),
+    "fall during hike": (2, 8),
+    "plane crash": (0, 2),
+}
+
+CAUSE_WARMTH_HIT = {"sudden storm": 25, "plane crash": 10, "fall during hike": 5}

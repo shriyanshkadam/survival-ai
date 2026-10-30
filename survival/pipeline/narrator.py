@@ -26,7 +26,7 @@ SANITY_NOTES= {
 
 HEALTH_BANDS= [(75, "fine"), (50, "hurt"), (25, "badly hurt"), (0,"near death")]
 SANITY_BANDS= [(60, "steady"), (30, "frayed"), (0, "unraveling")]
-
+NEED_BANDS = [(60, "fine"), (30, "low"), (10, "very low"), (0, "empty")]
 def band(value, bands):
     for minimum, lable in bands:
         if value >= minimum:
@@ -59,6 +59,7 @@ def build_messages(game, intent, result, player_text):
         f"What changed: {'; '.join(changes) or 'nothing'}.\n"
         f"Time of day: {daytime}.\n"
         f"Condition: {band(s.health, HEALTH_BANDS)}; "
+                f"Needs: food {band(s.food, NEED_BANDS)}, water {band(s.water, NEED_BANDS)}, warmth {band(s.warmth, NEED_BANDS)}.\n"
         f"Injuries: {', '.join(s.injuries) or 'none'}.\n"
         f"Carrying: {', '.join(s.inventory) or 'nothing'}.\n"
         f"Mental state: {mind}.\n"
@@ -107,6 +108,8 @@ def build_opening_messages(game):
         f"Condition: {band(s.health, HEALTH_BANDS)}; injuries: {', '.join(s.injuries) or 'none'}.\n"
         f"Carrying: {', '.join(s.inventory) or 'nothing'}.\n"
         f"Mental state: {mind}.\n"
+        f"Hours since things went wrong: {sc.hours_out}.\n"
+        f"Needs: food {band(s.food, NEED_BANDS)}, water {band(s.water, NEED_BANDS)}, warmth {band(s.warmth, NEED_BANDS)}.\n"
     )
     system = (OPENING_STYLE + " " + SANITY_NOTES[mind]).strip()
     return [

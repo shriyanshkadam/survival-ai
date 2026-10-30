@@ -12,9 +12,12 @@ class Game:
         self.state = self.scenario.state
         self.log = EventLog()
 
+    def environment(self):
+        return {"setting": self.scenario.setting, "start_hour": self.scenario.start_hour}
+
     def play_turn(self, intent, player_input=""):
         before = self.state.to_dict()
-        result = resolve(self.state, intent, self.rng)
+        result = resolve(self.state, intent, self.rng, self.environment())
         self.log.add(Event(
             turn = self.state.turn,
             player_input=player_input,
@@ -24,6 +27,7 @@ class Game:
             state_before=before,
             state_after=self.state.to_dict(),
             outcome=result['outcome'],
+            
 
         ))
 

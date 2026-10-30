@@ -1,7 +1,7 @@
 from dataclasses import dataclass
-from survival.engine.balance import (CARRY_CAPACITY, HAND_CAPACITY, INJURY_SEVERITY, MAX_START_INJURIES, MIN_START_HEALTH, SIZE_CLASSES, START_INJURY_WEIGHTS, START_SANITY)
-from survival.engine.scenario_data import CAUSES, CHARACTERS, SETTINGS, START_INJURIES
-from survival.engine.state import GameState
+from survival.engine.balance import (CARRY_CAPACITY, HAND_CAPACITY, INJURY_SEVERITY, MAX_START_INJURIES, MIN_START_HEALTH, SIZE_CLASSES, START_INJURY_WEIGHTS, START_SANITY, START_NEEDS, FOOD_DRAIN, WARMTH_DRAIN, WARMTH_PROTECTION, WATER_DRAIN)
+from survival.engine.scenario_data import CAUSES, CHARACTERS, SETTINGS, START_INJURIES, CAUSE_WARMTH_HIT, CAUSE_HOURS_OUT
+from survival.engine.state import GameState, clamp
 
 @dataclass
 class Scenario:
@@ -10,6 +10,7 @@ class Scenario:
     cause: str
     state: GameState
     start_hour: int = 12
+    hours_out: int = 0
 
 
 def roll_scenario(rng):
@@ -47,6 +48,11 @@ def roll_scenario(rng):
         capacity=capacity, item_sizes=item_sizes,
     )
     start_hour = rng.randint(0, 23)
-    return Scenario(character, setting, cause, state, start_hour)
-
-
+    hours_out = rng.randint(*CAUSE_HOURS_OUT[cause])
+    state.food = int(clamp(100 - FOOD_DRAIN * hours_out + rng.randint(-10, 10)))
+    state.water = int(clamp(100 - WATER_DRAIN * hours_out + rng.randint(-10, 10)))
+    state.warmth = int(clamp(
+        100 - WARMTH_DRAIN.get(setting, {}).get("day", 2) * hours_out
+        - CAUSE_WARMTH_HIT.get(cause, 0) + rng.randint(-10, 10)
+    ))
+    return Scenario(character, setting, cause, state, start_hour, hours_out)

@@ -50,6 +50,9 @@ function clockText(hour, phase) {
 function renderState(state) {
   document.getElementById("health-bar").style.width = state.health + "%";
   document.getElementById("sanity-bar").style.width = state.sanity + "%";
+  document.getElementById("food-bar").style.width = state.food + "%";
+  document.getElementById("water-bar").style.width = state.water + "%";
+  document.getElementById("warmth-bar").style.width = state.warmth + "%";
   document.getElementById("clock").textContent = clockText(state.hour, state.phase_of_day);
   document.getElementById("injuries").textContent = state.injuries.length ? state.injuries.join(", ") : "none";
   document.getElementById("pack-label").textContent = "Pack " + state.used_space + " / " + state.capacity;
