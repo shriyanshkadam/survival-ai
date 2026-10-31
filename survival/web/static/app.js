@@ -54,7 +54,6 @@ function renderState(state) {
   document.getElementById("water-bar").style.width = state.water + "%";
   document.getElementById("warmth-bar").style.width = state.warmth + "%";
   document.getElementById("clock").textContent = clockText(state.hour, state.phase_of_day);
-  document.getElementById("injuries").textContent = state.injuries.length ? state.injuries.join(", ") : "none";
   document.getElementById("pack-label").textContent = "Pack " + state.used_space + " / " + state.capacity;
   const pack = document.getElementById("pack");
   pack.textContent = "";
@@ -68,6 +67,10 @@ function renderState(state) {
   for (const layer of document.querySelectorAll("#sky div")) {
     layer.classList.toggle("on", layer.dataset.phase === state.phase_of_day);
   }
+  const info = state.injury_info || {};
+  document.getElementById("injuries").textContent = state.injuries.length
+    ? state.injuries.map((n) => n + (info[n] && info[n].phase === "acute" ? " (worsening)" : "")).join(", ")
+    : "none";
 }
 
 async function startGame() {

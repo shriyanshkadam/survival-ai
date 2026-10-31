@@ -35,6 +35,7 @@ RISK_FAIL_CHANCE = {
     "low": 0.1,
     "medium": 0.3,
     "high": 0.6,
+    "certain": 1.0,
 }
 
 START_NEEDS= (70, 100)
@@ -57,7 +58,6 @@ HEAT_THIRST_MULT = {
 COLD_THRESHOLD = 6
 COLD_FOOD_MULT = 1.5
 
-# an item whose name contains the word cuts warmth loss by that fraction
 WARMTH_PROTECTION = {"blanket": 0.4, "tent": 0.5, "jacket": 0.3, "coat": 0.3}
 
 STARVATION_HEALTH_PER_HOUR = {"food": 2, "water": 5, "warmth": 8}
@@ -98,3 +98,105 @@ FINDABLE = {
 FORAGE_MISS_CHANCE = 0.4
 ALWAYS_AVAILABLE = ("rock", "dirt")
 
+INJURY_HOOKS = {
+    "health_per_hour": (0.0, 8.0),
+    "sanity_per_hour": (0.0, 3.0),
+    "forage_miss": (0.0, 0.3),
+    "fail_bonus": (0.0, 0.3),
+    "action_minutes_mult": (1.0, 2.0),
+    "food_drain_mult": (1.0, 2.0),
+    "water_drain_mult": (1.0, 2.0),
+    "warmth_drain_mult": (1.0, 2.0),
+}
+
+INJURY_BUDGET = {"minor": 0.4, "moderate": 1.0, "major": 2.0, "critical": 3.0}
+MAX_INJURY_EFFECTS = 4
+
+INJURY_TAGS = ("climb", "travel", "hands", "forage", "fire", "craft", "fight")
+INJURY_TREATMENTS = ("bandage", "splint", "pressure", "clean", "rest", "warm", "cool")
+
+DEFAULT_STABILIZE_HOURS = {"minor": 12, "moderate": 36, "major": 72, "critical": 96}
+
+DEFAULT_INJURY_EFFECTS = {
+    "minor": [{"hook": "fail_bonus", "value": 0.03}],
+    "moderate": [
+        {"hook": "fail_bonus", "value": 0.08},
+        {"hook": "action_minutes_mult", "value": 1.15},
+    ],
+    "major": [
+        {"hook": "health_per_hour", "value": 2},
+        {"hook": "fail_bonus", "value": 0.15},
+        {"hook": "action_minutes_mult", "value": 1.3},
+    ],
+    "critical": [
+        {"hook": "health_per_hour", "value": 5},
+        {"hook": "fail_bonus", "value": 0.25},
+        {"hook": "action_minutes_mult", "value": 1.5},
+    ],
+}
+
+KNOWN_INJURIES = {
+    "bruised ribs": {
+        "tier": "minor",
+        "effects": [
+            {"hook": "fail_bonus", "value": 0.05},
+            {"hook": "action_minutes_mult", "value": 1.1},
+        ],
+        "stabilize": {"by": ["rest"], "hours": 12},
+    },
+    "sprained wrist": {
+        "tier": "minor",
+        "effects": [{"hook": "fail_bonus", "value": 0.08, "tags": ["hands", "craft"]}],
+        "stabilize": {"by": ["splint", "bandage", "rest"], "hours": 24},
+    },
+    "scratched forearms": {
+        "tier": "minor",
+        "effects": [
+            {"hook": "health_per_hour", "value": 0.5},
+            {"hook": "fail_bonus", "value": 0.03, "tags": ["hands"]},
+        ],
+        "stabilize": {"by": ["clean", "bandage"], "hours": 12},
+    },
+    "deep thigh cut": {
+        "tier": "moderate",
+        "effects": [
+            {"hook": "health_per_hour", "value": 3},
+            {"hook": "action_minutes_mult", "value": 1.2},
+            {"hook": "fail_bonus", "value": 0.05, "tags": ["travel", "climb"]},
+        ],
+        "stabilize": {"by": ["bandage", "pressure"], "hours": 48},
+    },
+    "twisted ankle": {
+        "tier": "moderate",
+        "effects": [
+            {"hook": "action_minutes_mult", "value": 1.3},
+            {"hook": "fail_bonus", "value": 0.12, "tags": ["travel", "climb"]},
+            {"hook": "forage_miss", "value": 0.08},
+        ],
+        "stabilize": {"by": ["splint", "bandage", "rest"], "hours": 36},
+    },
+    "broken forearm": {
+        "tier": "major",
+        "effects": [
+            {"hook": "health_per_hour", "value": 2},
+            {"hook": "fail_bonus", "value": 0.2, "tags": ["hands", "climb", "craft"]},
+            {"hook": "sanity_per_hour", "value": 0.5},
+        ],
+        "stabilize": {"by": ["splint"], "hours": 72},
+    },
+    "concussion": {
+        "tier": "major",
+        "effects": [
+            {"hook": "fail_bonus", "value": 0.2},
+            {"hook": "action_minutes_mult", "value": 1.3},
+            {"hook": "sanity_per_hour", "value": 1},
+        ],
+        "stabilize": {"by": ["rest"], "hours": 24},
+    },
+}
+
+MAX_TOTAL_BLEED = 12.0
+MAX_DRAIN_MULT = 3.0
+MAX_ACTION_FAIL_BONUS = 0.5
+MAX_ACTION_FORAGE_MISS = 0.5
+MAX_ACTION_MINUTES_MULT = 2.5

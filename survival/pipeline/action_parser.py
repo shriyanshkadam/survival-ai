@@ -2,6 +2,9 @@ import json
 from dataclasses import fields
 from survival.engine.balance import INJURY_SEVERITY, RISK_FAIL_CHANCE, SIZE_CLASSES
 from survival.engine.rules import Intent
+from survival.engine.balance import INJURY_HOOKS, INJURY_TAGS, INJURY_TREATMENTS
+from survival.engine.injuries import describe
+
 
 INTENT_FIELDS= {f.name for f in fields(Intent)}
 
@@ -12,10 +15,18 @@ def build_system_prompt():
         "Fields: description (string); requires (items the player must hold and keeps); "
         "consumes (items used up); produces (items created); "
         "new_item_sizes (object mapping each new item name to a size class); "
-         "ingests (short plain name of what the player eats or drinks, like 'energy bar', 'water', 'snow', 'berries'; otherwise empty); "
+        "ingests (short plain name of what the player eats or drinks, like 'energy bar', 'water', 'snow', 'berries'; otherwise empty); "
         "only when the player eats or drinks something that is used up); "
         "minutes (whole number of minutes the action realistically takes, e.g. eating 5, searching an area 45, sleeping 360); "
-
+        
+        "treats (exact name of an injury the player is treating, otherwise empty); "
+        f"treatment (one of {list(INJURY_TREATMENTS)}, only together with treats); "
+        f"tags (zero or more of {list(INJURY_TAGS)} that describe the action); "
+        "injury_effects (only if the action can cause a new injury: up to 3 objects "
+        '{"hook": name, "value": number, "tags": [..]}, hooks: '
+        f"{list(INJURY_HOOKS)}; health_per_hour is blood loss or infection, fail_bonus makes risky "
+        "actions fail more, action_minutes_mult above 1 slows everything); "
+        
         f"risk (one of {list(RISK_FAIL_CHANCE)}); "
         f"harm (one of {list(INJURY_SEVERITY)}); "
         'injury (short injury name if it goes wrong, otherwise "").\n'
@@ -45,12 +56,16 @@ def build_system_prompt():
         "If they search for or find it, leave consumes empty. "
         "Searching for food or water takes about 45 minutes and is low risk. "
         "Never set ingests for things that are not food or drink. "
+        "A deliberate jump, fall or crash is risk certain. "
+        "To treat an injury, set treats to its exact name (the words before the bracket in the injuries list) "
+        "and treatment to the method, and list the items that method needs in requires. "
+        "Use treatment rest only when the player rests. "
     )
 
 def build_messages(player_text, state):
     context= (
         f"Inventory: {state.inventory}\n"
-        f"Injuries: {state.injuries}\n"
+        f"Injuries: {describe(state) or 'none'}\n"
         f"Health: {state.health}, Sanity: {state.sanity}"
 
     )
@@ -70,13 +85,16 @@ def extract_json(text):
 def check_types(data):
     if not isinstance(data, dict):
         raise ValueError("JSON must be an object")
-    for name in ("requires","consumes", "produces"):
+    for name in ("requires", "consumes", "produces", "tags"):
         value = data.get(name, [])
-        if not isinstance( value, list) or not all(isinstance(x, str) for x in value):
+        if not isinstance(value, list) or not all(isinstance(x, str) for x in value):
             raise ValueError(f"{name} must be a list of strings")
-    restores = data.get("restores", {})
-    if not isinstance(data.get("ingests", ""), str):
-        raise ValueError("ingests must be a string")
+    for name in ("ingests", "treats", "treatment"):
+        if not isinstance(data.get(name, ""), str):
+            raise ValueError(f"{name} must be a string")
+    effects = data.get("injury_effects", [])
+    if not isinstance(effects, list) or not all(isinstance(x, dict) for x in effects):
+        raise ValueError("injury_effects must be a list of objects")
     sizes = data.get("new_item_sizes", {})
     if not isinstance(sizes, dict):
         raise ValueError("new_item_sizes must be an object")

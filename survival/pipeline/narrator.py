@@ -1,6 +1,7 @@
 from survival.engine.state import Phase
 from survival.engine.clock import hour_at, phase_of_day
 from survival.llm.base import LLMUnavailable
+from survival.engine.injuries import describe
 
 STYLE = (
     "You are the narrator of a realistic survival game. "
@@ -16,6 +17,7 @@ STYLE = (
     "Mention carried items only if the action used them. "
     "Do not repeat the time of day or old injuries unless they matter now. "
     "Never mention numbers, health points or game mechanics."
+    "If an injury is still getting worse, such as bleeding, let it show in the story. "
 )
 
 SANITY_NOTES= {
@@ -44,6 +46,28 @@ def build_messages(game, intent, result, player_text):
             changes.append("used up: " + ", ".join(intent.consumes))
         if intent.produces:
             changes.append("now has: " + ", ".join(intent.produces))
+    ing = result.get("ingested")
+    if ing:
+        e = ing["effects"]
+        if e.get("food", 0) > 0:
+            changes.append("less hungry")
+        if e.get("water", 0) > 0:
+            changes.append("less thirsty")
+        if e.get("warmth", 0) < 0:
+            changes.append("noticeably colder")
+        if e.get("sanity", 0) < 0:
+            changes.append("shaken")
+        if e.get("health", 0) < 0:
+            changes.append("feeling sick")
+        if e.get("injury"):
+            changes.append("hurt: " + e["injury"][0])
+    if result.get("found_nothing"):
+        changes.append("searched and found nothing to eat or drink")
+    if result.get("new_injury"):
+        changes.append("injured: " + result["new_injury"])
+    if result.get("treated"):
+        changes.append("treated: " + result["treated"] + " (it has stopped getting worse)")
+
     in_trouble = band(s.health, HEALTH_BANDS) in ("badly hurt", "near death") or mind == "unraveling"
     recent = "\n".join(
         f"- {e.player_input} -> {e.outcome}: {e.narrative}"
@@ -59,7 +83,8 @@ def build_messages(game, intent, result, player_text):
         f"What changed: {'; '.join(changes) or 'nothing'}.\n"
         f"Time of day: {daytime}.\n"
         f"Condition: {band(s.health, HEALTH_BANDS)}; "
-                f"Needs: food {band(s.food, NEED_BANDS)}, water {band(s.water, NEED_BANDS)}, warmth {band(s.warmth, NEED_BANDS)}.\n"
+        f"Injury status: {'; '.join(describe(s)) or 'none'}.\n"
+        f"Needs: food {band(s.food, NEED_BANDS)}, water {band(s.water, NEED_BANDS)}, warmth {band(s.warmth, NEED_BANDS)}.\n"
         f"Injuries: {', '.join(s.injuries) or 'none'}.\n"
         f"Carrying: {', '.join(s.inventory) or 'nothing'}.\n"
         f"Mental state: {mind}.\n"

@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from survival.engine.balance import (CARRY_CAPACITY, HAND_CAPACITY, INJURY_SEVERITY, MAX_START_INJURIES, MIN_START_HEALTH, SIZE_CLASSES, START_INJURY_WEIGHTS, START_SANITY, START_NEEDS, FOOD_DRAIN, WARMTH_DRAIN, WARMTH_PROTECTION, WATER_DRAIN)
 from survival.engine.scenario_data import CAUSES, CHARACTERS, SETTINGS, START_INJURIES, CAUSE_WARMTH_HIT, CAUSE_HOURS_OUT
 from survival.engine.state import GameState, clamp
+from survival.engine.injuries import make_info
 
 @dataclass
 class Scenario:
@@ -28,6 +29,7 @@ def roll_scenario(rng):
 
 
     injuries= []
+    info= {}
     damage = 0
     tiers= list(START_INJURY_WEIGHTS)
     weights = list(START_INJURY_WEIGHTS.values())
@@ -37,6 +39,7 @@ def roll_scenario(rng):
         if injury in injuries: 
             continue
         injuries.append(injury)
+        info[injury] = make_info(injury, tier, 0)
         low, high = INJURY_SEVERITY[tier]
         damage += rng.randint(low, high)
 
@@ -45,7 +48,7 @@ def roll_scenario(rng):
 
     state = GameState(
         health=health, sanity=sanity, injuries=injuries, inventory=inventory,
-        capacity=capacity, item_sizes=item_sizes,
+        capacity=capacity, item_sizes=item_sizes, injury_info= info,
     )
     start_hour = rng.randint(0, 23)
     hours_out = rng.randint(*CAUSE_HOURS_OUT[cause])

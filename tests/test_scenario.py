@@ -35,3 +35,10 @@ def test_start_needs_vary():
         assert 0 <= sc.state.food <= 100
         seen.add((sc.state.food, sc.state.water))
     assert len(seen) > 5
+
+def test_start_injuries_have_profiles():
+    import random
+    for seed in range(50):
+        s = roll_scenario(random.Random(seed)).state
+        for name in s.injuries:
+            assert name in s.injury_info
