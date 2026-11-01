@@ -17,6 +17,10 @@ STYLE = (
     "Mention carried items only if the action used them. "
     "Do not repeat the time of day or old injuries unless they matter now. "
     "Never mention numbers, health points or game mechanics."
+    "Never invent a fire, shelter, camp, light or any object that is not in the facts; "
+    "a fire exists only if the player lit one this turn. "
+    "Never use the words stabilized, acute, worsening or tier; describe how the injury feels instead. "
+    "Keep jokes about the player's situation, never trivia about objects. "
     "If an injury is still getting worse, such as bleeding, let it show in the story. "
 )
 
@@ -65,6 +69,8 @@ def build_messages(game, intent, result, player_text):
         changes.append("searched and found nothing to eat or drink")
     if result.get("new_injury"):
         changes.append("injured: " + result["new_injury"])
+    if result.get("hit_again"):
+        changes.append("hit the already injured " + result["hit_again"] + " again")
     if result.get("treated"):
         changes.append("treated: " + result["treated"] + " (it has stopped getting worse)")
 
@@ -75,7 +81,7 @@ def build_messages(game, intent, result, player_text):
     )
     reasons = "; ".join(result.get("rejected", []))
     facts= (
-                f"Scenario: {game.scenario.character}, {game.scenario.setting}, "
+        f"Scenario: {game.scenario.character}, {game.scenario.setting}, "
         f"{game.scenario.cause}.\n"
         f"Recent story:\n{recent or '- (nothing yet)'}\n"
         f"The player tried: {player_text or intent.description}\n"
@@ -111,12 +117,12 @@ def narrate(llm, game, intent, result, player_text):
 
 OPENING_STYLE = (
     "You are the narrator of a realistic survival game. "
-    "Write in second person, in plain simple words, with at most one dry joke that comes from a true fact. "
-    "Explain the situation in one clear paragraph of 5 to 7 sentences: who the player is, "
-    "where they are, how they got here, how they feel, what they carry and what time of day it is. "
-    "Use ONLY the facts given. Never invent items, injuries or places. "
-    "No metaphors or similes. Never mention numbers or game mechanics."
-    "Never label a joke and never add outside trivia; any humour must be about the given facts only. "
+    "Write in second person, in plain simple words, in one clear paragraph of 5 to 7 sentences: "
+    "who the player is, where they are, how they got here, how they feel, what they carry and what time of day it is. "
+    "List carried items by name only and never say what they are for. "
+    "Use ONLY the facts given. Never invent items, injuries, objects or places. "
+    "No metaphors, no similes, no jokes. Never mention numbers or game mechanics. "
+    "Mention hunger, thirst or cold only if that need is low. "
 )
 
 

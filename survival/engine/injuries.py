@@ -3,7 +3,7 @@ import math
 from survival.engine.balance import (
     DEFAULT_INJURY_EFFECTS, DEFAULT_STABILIZE_HOURS, INJURY_BUDGET, INJURY_HOOKS,
     INJURY_TAGS, KNOWN_INJURIES, MAX_ACTION_FAIL_BONUS, MAX_ACTION_FORAGE_MISS,
-    MAX_ACTION_MINUTES_MULT, MAX_DRAIN_MULT, MAX_INJURY_EFFECTS, MAX_TOTAL_BLEED,
+    MAX_ACTION_MINUTES_MULT, MAX_DRAIN_MULT, MAX_INJURY_EFFECTS, MAX_TOTAL_BLEED,BODY_PARTS, TIER_ORDER,
 )
 
 ACUTE_BY_DEFAULT = {
@@ -140,3 +140,24 @@ def describe(state):
         else:
             out.append(name)
     return out
+
+def body_part(name):
+    low = name.lower()
+    for part, words in BODY_PARTS.items():
+        if any(w in low for w in words):
+            return part
+    return None
+
+
+def same_part(state, name):
+    part = body_part(name)
+    if part is None:
+        return None
+    for other in state.injuries:
+        if other != name and body_part(other) == part:
+            return other
+    return None
+
+
+def tier_rank(tier):
+    return TIER_ORDER.index(tier) if tier in TIER_ORDER else 0

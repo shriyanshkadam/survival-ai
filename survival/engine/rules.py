@@ -2,8 +2,11 @@ from dataclasses import dataclass, field
 from survival.engine.balance import (
     RISK_FAIL_CHANCE, INJURY_SEVERITY, DEFAULT_MINUTES, MIN_MINUTES, MAX_MINUTES,
     INGEST_PROFILES, FINDABLE, ALWAYS_AVAILABLE, FORAGE_MISS_CHANCE,
+    STRESS_SANITY, EFFORT_DRAIN_MULT, IMPOSSIBLE_INJURY_WORDS, HARM_CAP_NO_CLIMB,
 )
-from survival.engine.injuries import action_modifiers, can_treat, make_info
+from survival.engine.injuries import (
+    action_modifiers, can_treat, make_info, normalize_tier, same_part, tier_rank,
+)
 from survival.engine.items import match_key
 from survival.engine.needs import upkeep
 from survival.engine.state import clamp
@@ -25,6 +28,8 @@ class Intent:
     treats: str = ""
     treatment: str = ""
     injury_effects: list[dict] = field(default_factory=list)
+    effort: str = "light"
+    stress: str = "none"
 
 
 def resolve(state, intent, rng, env=None):
@@ -36,6 +41,10 @@ def resolve(state, intent, rng, env=None):
         rejected.append(f"unknown risk level'{intent.risk}'")
     if intent.risk != "none" and intent.harm not in INJURY_SEVERITY:
         rejected.append(f"unknown harm tier'{intent.harm}'")
+    for word in IMPOSSIBLE_INJURY_WORDS:
+        if word in (intent.injury or "").lower():
+            rejected.append(f"'{intent.injury}' cannot happen from this action")
+            break
 
     key = None
     foraging = False
@@ -57,6 +66,12 @@ def resolve(state, intent, rng, env=None):
     if rejected:
         return {"ok": False, "turn": state.turn, "rejected": rejected, "outcome": "rejected"}
 
+    harm = intent.harm if intent.harm in INJURY_SEVERITY else "minor"
+    if harm in ("critical", "lethal") and "climb" not in intent.tags:
+        harm = HARM_CAP_NO_CLIMB
+    effort = intent.effort if intent.effort in EFFORT_DRAIN_MULT else "light"
+    stress = STRESS_SANITY.get(intent.stress, 0)
+
     try:
         minutes = int(intent.minutes)
     except (TypeError, ValueError):
@@ -64,7 +79,7 @@ def resolve(state, intent, rng, env=None):
     mods = action_modifiers(state, intent.tags)
     minutes = clamp(int(clamp(minutes, MIN_MINUTES, MAX_MINUTES) * mods["minutes_mult"]),
                     MIN_MINUTES, MAX_MINUTES)
-    drain = upkeep(state, env, minutes)
+    drain = upkeep(state, env, minutes, effort)
 
     base = RISK_FAIL_CHANCE[intent.risk]
     if intent.risk == "none":
@@ -79,18 +94,37 @@ def resolve(state, intent, rng, env=None):
               and rng.random() < miss_chance)
 
     if failed:
-        low, high = INJURY_SEVERITY[intent.harm]
+        low, high = INJURY_SEVERITY[harm]
         damage = rng.randint(low, high)
-        names = [intent.injury] if intent.injury else []
-        since = state.elapsed_minutes + minutes
-        profiles = {n: make_info(n, intent.harm, since, intent.injury_effects) for n in names}
+        names, profiles, heal, hit_again = [], {}, [], None
+        if intent.injury:
+            if intent.injury in state.injuries:
+                hit_again = intent.injury
+            else:
+                clash = same_part(state, intent.injury)
+                if clash is None:
+                    names = [intent.injury]
+                else:
+                    old_tier = state.injury_info.get(clash, {}).get("tier", "minor")
+                    if tier_rank(normalize_tier(harm)) > tier_rank(old_tier):
+                        names = [intent.injury]
+                        heal = [clash]
+                    else:
+                        hit_again = clash
+            if names:
+                profiles[names[0]] = make_info(
+                    names[0], harm, state.elapsed_minutes + minutes, intent.injury_effects)
         result = state.apply(
-            health_delta=-damage + drain["health"], sanity_delta=drain["sanity"],
+            health_delta=-damage + drain["health"],
+            sanity_delta=drain["sanity"] - stress,
             food_delta=drain["food"], water_delta=drain["water"], warmth_delta=drain["warmth"],
-            add_injuries=names, injury_profiles=profiles, minutes=minutes,
+            add_injuries=names, heal_injuries=heal, injury_profiles=profiles, minutes=minutes,
         )
-        if result["ok"] and names:
-            result["new_injury"] = names[0]
+        if result["ok"]:
+            if names:
+                result["new_injury"] = names[0]
+            if hit_again:
+                result["hit_again"] = hit_again
     else:
         effects = INGEST_PROFILES[key] if key and not missed else {}
         new_injuries = []
@@ -101,7 +135,7 @@ def resolve(state, intent, rng, env=None):
             profiles[name] = make_info(name, tier, state.elapsed_minutes + minutes)
         result = state.apply(
             health_delta=drain["health"] + effects.get("health", 0),
-            sanity_delta=drain["sanity"] + effects.get("sanity", 0),
+            sanity_delta=drain["sanity"] + effects.get("sanity", 0) - stress,
             food_delta=drain["food"] + effects.get("food", 0),
             water_delta=drain["water"] + effects.get("water", 0),
             warmth_delta=drain["warmth"] + effects.get("warmth", 0),

@@ -23,6 +23,11 @@ def build_system_prompt():
         f"treatment (one of {list(INJURY_TREATMENTS)}, only together with treats); "
         f"tags (zero or more of {list(INJURY_TAGS)} that describe the action); "
         "injury_effects (only if the action can cause a new injury: up to 3 objects "
+        "effort (one of rest, light, normal, heavy: how physically hard the action is; "
+        "jumping, running, climbing, digging and fighting are heavy); "
+        "stress (one of none, low, medium, high: how disturbing or reckless the action is; "
+        "calm sensible actions are none, risky or unpleasant ones low, frantic or gruesome ones medium, "
+        "self-destructive or terrifying ones high); "
         '{"hook": name, "value": number, "tags": [..]}, hooks: '
         f"{list(INJURY_HOOKS)}; health_per_hour is blood loss or infection, fail_bonus makes risky "
         "actions fail more, action_minutes_mult above 1 slows everything); "
@@ -60,6 +65,8 @@ def build_system_prompt():
         "To treat an injury, set treats to its exact name (the words before the bracket in the injuries list) "
         "and treatment to the method, and list the items that method needs in requires. "
         "Use treatment rest only when the player rests. "
+        "Never create injuries that remove or destroy a body part; use the injury a real accident would cause. "
+        "Only use harm critical or lethal for falls from a height or similarly deadly events, and add the tag climb. "
     )
 
 def build_messages(player_text, state):

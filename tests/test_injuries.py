@@ -113,3 +113,43 @@ def test_failed_action_creates_injury_with_profile():
 def test_injury_info_survives_save_and_load():
     s = with_injury("concussion", "major")
     assert GameState.from_dict(s.to_dict()).injury_info == s.injury_info
+
+def test_same_body_part_does_not_stack():
+    s = GameState(injuries=["broken forearm"],
+                  injury_info={"broken forearm": make_info("broken forearm", "major", 0)})
+    intent = Intent(description="punch a tree", risk="certain", harm="moderate", injury="bruised arm")
+    resolve(s, intent, random.Random(1))
+    assert s.injuries == ["broken forearm"]
+
+
+def test_worse_injury_replaces_milder_one_on_same_part():
+    s = GameState(injuries=["bruised ribs"],
+                  injury_info={"bruised ribs": make_info("bruised ribs", "minor", 0)})
+    intent = Intent(description="fall on a log", risk="certain", harm="major", injury="cracked rib")
+    resolve(s, intent, random.Random(1))
+    assert s.injuries == ["cracked rib"]
+
+
+def test_impossible_injury_is_rejected():
+    intent = Intent(description="punch", risk="certain", harm="major", injury="arm falls off")
+    assert resolve(GameState(), intent, random.Random(1))["outcome"] == "rejected"
+
+
+def test_extreme_harm_needs_a_climb():
+    s = GameState()
+    intent = Intent(description="bash head", risk="certain", harm="lethal", injury="skull fracture")
+    resolve(s, intent, random.Random(1))
+    assert s.phase.value == "playing"
+
+
+def test_reckless_action_costs_sanity():
+    s = GameState(sanity=60)
+    resolve(s, Intent(description="scream and slam fists", stress="high"), random.Random(1))
+    assert s.sanity == 48
+
+
+def test_heavy_effort_costs_water_even_when_short():
+    s = GameState(water=80, food=80)
+    env = {"setting": "snowy valley", "start_hour": 12}
+    resolve(s, Intent(description="jump a lot", effort="heavy", minutes=5), random.Random(1), env)
+    assert s.water <= 77

@@ -200,3 +200,25 @@ MAX_DRAIN_MULT = 3.0
 MAX_ACTION_FAIL_BONUS = 0.5
 MAX_ACTION_FORAGE_MISS = 0.5
 MAX_ACTION_MINUTES_MULT = 2.5
+
+STRESS_SANITY = {"none": 0, "low": 2, "medium": 6, "high": 12}
+EFFORT_DRAIN_MULT = {"rest": 0.7, "light": 1.0, "normal": 1.4, "heavy": 2.2}
+EFFORT_FLAT_COST = {"heavy": (3, 2)}
+
+IMPOSSIBLE_INJURY_WORDS = (
+    "falls off", "fall off", "severed", "amputat", "detach",
+    "chopped off", "cut off", "ripped off", "torn off", "blown off",
+)
+HARM_CAP_NO_CLIMB = "major"
+
+BODY_PARTS = {
+    "head": ("head", "skull", "concussion", "scalp", "face"),
+    "arm": ("arm", "forearm", "elbow", "shoulder"),
+    "hand": ("hand", "wrist", "finger", "thumb", "knuckle"),
+    "leg": ("leg", "thigh", "knee", "shin", "calf"),
+    "foot": ("foot", "ankle", "toe", "heel"),
+    "ribs": ("rib", "chest"),
+    "back": ("back", "spine"),
+    "teeth": ("tooth", "teeth", "jaw"),
+}
+TIER_ORDER = ("minor", "moderate", "major", "critical")

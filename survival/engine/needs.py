@@ -2,7 +2,7 @@ import math
 
 from survival.engine.balance import (
     COLD_FOOD_MULT, COLD_THRESHOLD, FOOD_DRAIN, HEAT_THIRST_MULT,
-    STARVATION_HEALTH_PER_HOUR, WARMTH_DRAIN, WARMTH_PROTECTION, WATER_DRAIN,
+    STARVATION_HEALTH_PER_HOUR, WARMTH_DRAIN, WARMTH_PROTECTION, WATER_DRAIN, EFFORT_DRAIN_MULT, EFFORT_FLAT_COST,
 )
 from survival.engine.clock import hour_at, phase_of_day
 from survival.engine.injuries import drain_modifiers
@@ -19,7 +19,8 @@ def protection(inventory):
     return best
 
 
-def upkeep(state, env, minutes):
+def upkeep(state, env, minutes, effort="light"):
+    effort_mult = EFFORT_DRAIN_MULT.get(effort, 1.0)
     out = {"food": 0.0, "water": 0.0, "warmth": 0.0, "health": 0, "sanity": 0}
     if minutes <= 0:
         return out
@@ -41,8 +42,8 @@ def upkeep(state, env, minutes):
             cold = WARMTH_DRAIN.get(setting, {}).get(phase, 2)
             rates = {
                 "warmth": cold * (1 - shield) * mods["warmth_mult"],
-                "food": FOOD_DRAIN * (COLD_FOOD_MULT if cold >= COLD_THRESHOLD else 1.0) * mods["food_mult"],
-                "water": WATER_DRAIN * HEAT_THIRST_MULT.get(setting, {}).get(phase, 1.0) * mods["water_mult"],
+                "food": FOOD_DRAIN * (COLD_FOOD_MULT if cold >= COLD_THRESHOLD else 1.0) * mods["food_mult"] * effort_mult,
+                "water": WATER_DRAIN * HEAT_THIRST_MULT.get(setting, {}).get(phase, 1.0) * mods["water_mult"] * effort_mult,
             }
             for name, rate in rates.items():
                 drain = rate * hours
@@ -53,6 +54,9 @@ def upkeep(state, env, minutes):
             done += step
         for name in level:
             out[name] = round(level[name] - before[name], 2)
+        flat_water, flat_food = EFFORT_FLAT_COST.get(effort, (0, 0))
+        out["water"] -= flat_water
+        out["food"] -= flat_food
     out["health"] = -math.ceil(health_loss) if health_loss > 0.01 else 0
     out["sanity"] = -math.ceil(sanity_loss) if sanity_loss > 0.01 else 0
     return out

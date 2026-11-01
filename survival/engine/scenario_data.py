@@ -34,3 +34,15 @@ CAUSE_HOURS_OUT = {
 }
 
 CAUSE_WARMTH_HIT = {"sudden storm": 25, "plane crash": 10, "fall during hike": 5}
+
+CHARACTER_SETTINGS = {
+    "lost hiker": ["dense forest", "mountain ridge", "snowy valley", "frozen lake shore"],
+    "stranded roadtripper": ["desert highway", "mountain ridge", "snowy valley", "dense forest"],
+    "jungle camper": ["dense forest", "remote island"],
+}
+
+CHARACTER_CAUSES = {
+    "lost hiker": ["wandered off-trail", "sudden storm", "fall during hike"],
+    "stranded roadtripper": ["vehicle breakdown", "sudden storm"],
+    "jungle camper": ["wandered off-trail", "sudden storm", "fall during hike", "plane crash"],
+}

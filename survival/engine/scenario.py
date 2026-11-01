@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from survival.engine.balance import (CARRY_CAPACITY, HAND_CAPACITY, INJURY_SEVERITY, MAX_START_INJURIES, MIN_START_HEALTH, SIZE_CLASSES, START_INJURY_WEIGHTS, START_SANITY, START_NEEDS, FOOD_DRAIN, WARMTH_DRAIN, WARMTH_PROTECTION, WATER_DRAIN)
-from survival.engine.scenario_data import CAUSES, CHARACTERS, SETTINGS, START_INJURIES, CAUSE_WARMTH_HIT, CAUSE_HOURS_OUT
+from survival.engine.scenario_data import CHARACTERS, START_INJURIES, CAUSE_WARMTH_HIT, CAUSE_HOURS_OUT,CHARACTER_SETTINGS, CHARACTER_CAUSES
 from survival.engine.state import GameState, clamp
 from survival.engine.injuries import make_info
 
@@ -17,8 +17,8 @@ class Scenario:
 def roll_scenario(rng):
     character = rng.choice(list(CHARACTERS))
     kit = CHARACTERS[character]
-    setting = rng.choice(SETTINGS)
-    cause= rng.choice(CAUSES)
+    setting = rng.choice(CHARACTER_SETTINGS[character])
+    cause = rng.choice(CHARACTER_CAUSES[character])
 
     cap_low, cap_high = CARRY_CAPACITY[kit["gear"]]
     capacity = HAND_CAPACITY + rng.randint(cap_low, cap_high)

@@ -42,3 +42,10 @@ def test_start_injuries_have_profiles():
         s = roll_scenario(random.Random(seed)).state
         for name in s.injuries:
             assert name in s.injury_info
+
+def test_character_matches_setting_and_cause():
+    from survival.engine.scenario_data import CHARACTER_CAUSES, CHARACTER_SETTINGS
+    for seed in range(100):
+        sc = roll_scenario(random.Random(seed))
+        assert sc.setting in CHARACTER_SETTINGS[sc.character]
+        assert sc.cause in CHARACTER_CAUSES[sc.character]
