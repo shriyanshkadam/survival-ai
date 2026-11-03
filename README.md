@@ -1,3 +1,10 @@
+---
+title: Survival AI
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # Survival AI
 An LLM-based survival simulator, where the engine rolls a scenario and LLM narrates the scenario, while a backend tracks health, sanity, food, water, warmth, clock, inventory and injuries to keep everything realistic.
 The workflow is: LLM proposes and the engine validates and rolls all the numbers.
