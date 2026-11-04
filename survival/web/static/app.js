@@ -64,7 +64,8 @@ function renderState(state) {
     pack.appendChild(chip);
   }
   document.getElementById("nearby").textContent = "-";
-  for (const layer of document.querySelectorAll("#sky div")) {
+  document.body.dataset.p = state.phase_of_day;
+  for (const layer of document.querySelectorAll("#sky > div")) {
     layer.classList.toggle("on", layer.dataset.phase === state.phase_of_day);
   }
   const info = state.injury_info || {};
@@ -131,5 +132,60 @@ form.addEventListener("submit", async (event) => {
   sendBtn.disabled = false;
   input.focus();
 });
+
+const CLOUDS = {
+  dawn: { n: 4, a: 52, b: 68, c: "rgba(255,205,180,.38)", w: [70, 130], blur: 3 },
+  day: { n: 3, a: 42, b: 62, c: "rgba(255,255,255,.55)", w: [60, 120], blur: 3 },
+  dusk: { n: 4, a: 50, b: 68, c: "rgba(255,140,110,.34)", w: [70, 140], blur: 3 },
+  night: { n: 0 },
+};
+
+function addClouds(layer, f) {
+  for (let i = 0; i < f.n; i++) {
+    const w = f.w[0] + Math.random() * (f.w[1] - f.w[0]);
+    const cloud = document.createElement("div");
+    cloud.className = "cloud";
+    cloud.style.width = w + "px";
+    cloud.style.height = w * 0.12 + "px";
+    cloud.style.left = 8 + Math.random() * 80 + "%";
+    cloud.style.top = f.a + Math.random() * (f.b - f.a) + "%";
+    cloud.style.animationDuration = 80 + Math.random() * 60 + "s";
+    cloud.style.animationDelay = -Math.random() * 80 + "s";
+    for (const b of [[0, 30, 100, 50], [18, 0, 50, 70], [55, 20, 40, 60]]) {
+      const blob = document.createElement("div");
+      blob.className = "blob";
+      blob.style.left = b[0] + "%";
+      blob.style.top = b[1] + "%";
+      blob.style.width = b[2] + "%";
+      blob.style.height = b[3] + "%";
+      blob.style.background = f.c;
+      blob.style.filter = "blur(" + f.blur + "px)";
+      cloud.appendChild(blob);
+    }
+    layer.appendChild(cloud);
+  }
+}
+
+function addStars(layer) {
+  for (let i = 0; i < 110; i++) {
+    const star = document.createElement("div");
+    star.className = "star";
+    const size = 1 + Math.random() * 1.8;
+    star.style.width = size + "px";
+    star.style.height = size + "px";
+    star.style.left = Math.random() * 100 + "%";
+    star.style.top = Math.random() * 52 + "%";
+    star.style.animationDelay = -Math.random() * 3 + "s";
+    star.style.animationDuration = 2 + Math.random() * 3 + "s";
+    if (size > 2.3) star.style.boxShadow = "0 0 4px 1px rgba(255,255,255,.6)";
+    layer.appendChild(star);
+  }
+}
+
+for (const layer of document.querySelectorAll("#sky > div")) {
+  const phase = layer.dataset.phase;
+  addClouds(layer, CLOUDS[phase]);
+  if (phase === "night") addStars(layer);
+}
 
 startGame();

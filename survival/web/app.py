@@ -11,12 +11,15 @@ from pathlib import Path
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from survival.pipeline.narrator import fallback_opening, narrate_opening
+from survival.pipeline.session_log import SessionLogger
+from survival.version import VERSION
 
 load_dotenv()
 
 app = FastAPI()
 llm = build_llm()
 games = {}
+loggers = {}
 STATIC_DIR = Path(__file__).parent / "static"
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
@@ -47,11 +50,14 @@ def new_game():
     game_id = secrets.token_hex(8)
     game = Game(secrets.randbits(32))
     games[game_id] = game
+    loggers[game_id] = SessionLogger(game_id, game)
     s = game.scenario
     try:
         opening = narrate_opening(llm, game)
     except RuntimeError:
         opening = fallback_opening(game)
+    loggers[game_id].write({"kind": "opening", "text": opening,
+                            "narrator_model": getattr(llm, "last_used", None)})
     return {
         "game_id": game_id,
         "scenario": {"character": s.character, "setting": s.setting, "cause": s.cause},
@@ -70,9 +76,7 @@ def take_turn(req: TurnRequest):
     if len(text) > MAX_INPUT_LENGTH:
         raise HTTPException(status_code=400, detail="That action is too long.")
     try:
-        out = play_text(game, llm, text)
-        print("LLM:", llm.last_used)
-        if game.log.events: print("INTENT:", game.log.events[-1].changes, game.log.events[-1].rejected) 
+        out = play_text(game, llm, text, loggers.get(req.game_id))
     except RuntimeError:
         raise HTTPException(status_code=502, detail="The simulator hit a problem. Try again.")
     return {
@@ -82,6 +86,11 @@ def take_turn(req: TurnRequest):
         "state": snapshot(game),
     }
 
-@app.get("/")
+@app.get("/api/version")
+def version():
+    return {"version": VERSION}
+
+
+@app.api_route("/", methods=["GET", "HEAD"])
 def home():
     return FileResponse(STATIC_DIR / "index.html")
