@@ -96,7 +96,7 @@ def check_types(data):
         value = data.get(name, [])
         if not isinstance(value, list) or not all(isinstance(x, str) for x in value):
             raise ValueError(f"{name} must be a list of strings")
-    for name in ("ingests", "treats", "treatment"):
+    for name in ("ingests", "treats", "treatment", "effort", "stress", "injury", "risk", "harm"):
         if not isinstance(data.get(name, ""), str):
             raise ValueError(f"{name} must be a string")
     effects = data.get("injury_effects", [])

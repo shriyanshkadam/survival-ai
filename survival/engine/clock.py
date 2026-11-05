@@ -10,3 +10,9 @@ def phase_of_day(hour):
     if 17 <= hour < 20:
         return "dusk"
     return "night"
+
+def sky_phase(hour):
+    phase = phase_of_day(hour)
+    if phase == "day":
+        return "morning" if hour < 12 else "afternoon"
+    return phase

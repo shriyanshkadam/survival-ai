@@ -53,7 +53,7 @@ function renderState(state) {
   document.getElementById("food-bar").style.width = state.food + "%";
   document.getElementById("water-bar").style.width = state.water + "%";
   document.getElementById("warmth-bar").style.width = state.warmth + "%";
-  document.getElementById("clock").textContent = clockText(state.hour, state.phase_of_day);
+  document.getElementById("clock").textContent = clockText(state.hour, state.sky);
   document.getElementById("pack-label").textContent = "Pack " + state.used_space + " / " + state.capacity;
   const pack = document.getElementById("pack");
   pack.textContent = "";
@@ -64,9 +64,9 @@ function renderState(state) {
     pack.appendChild(chip);
   }
   document.getElementById("nearby").textContent = "-";
-  document.body.dataset.p = state.phase_of_day;
+  document.body.dataset.p = state.sky;
   for (const layer of document.querySelectorAll("#sky > div")) {
-    layer.classList.toggle("on", layer.dataset.phase === state.phase_of_day);
+    layer.classList.toggle("on", layer.dataset.phase === state.sky);
   }
   const info = state.injury_info || {};
   document.getElementById("injuries").textContent = state.injuries.length
@@ -135,7 +135,8 @@ form.addEventListener("submit", async (event) => {
 
 const CLOUDS = {
   dawn: { n: 4, a: 52, b: 68, c: "rgba(255,205,180,.38)", w: [70, 130], blur: 3 },
-  day: { n: 3, a: 42, b: 62, c: "rgba(255,255,255,.55)", w: [60, 120], blur: 3 },
+  morning: { n: 3, a: 42, b: 62, c: "rgba(255,255,255,.55)", w: [60, 120], blur: 3 },
+  afternoon: { n: 3, a: 44, b: 64, c: "rgba(255,225,190,.5)", w: [60, 120], blur: 3 },
   dusk: { n: 4, a: 50, b: 68, c: "rgba(255,140,110,.34)", w: [70, 140], blur: 3 },
   night: { n: 0 },
 };

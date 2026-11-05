@@ -2,7 +2,7 @@ import secrets
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from survival.engine.clock import hour_at, phase_of_day
+from survival.engine.clock import hour_at, phase_of_day, sky_phase
 from survival.engine.game import Game
 from survival.llm.factory import build_llm
 from survival.pipeline.turn import play_text
@@ -36,8 +36,8 @@ def snapshot(game):
         **state.to_dict(),
         "used_space": state.used_space(),
         "hour": round(hour, 2),
-        "phase_of_day": phase_of_day(hour)
-
+        "phase_of_day": phase_of_day(hour),
+        "sky": sky_phase(hour),
     }
 
 @app.get("/api/ping")

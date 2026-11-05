@@ -16,7 +16,7 @@
 body[data-p="dawn"] {
   --tx: #fff5ee; --mu: #f0d5d0; --you: #ffe3b0; --halo: rgba(30, 15, 50, 0.6);
 }
-body[data-p="day"] {
+body[data-p="morning"], body[data-p="afternoon"] {
   --tx: #fffaf0; --mu: #dfe9f7; --you: #ffe6a8; --halo: rgba(8, 28, 66, 0.6);
 }
 body[data-p="dusk"] {
@@ -47,11 +47,17 @@ body {
     radial-gradient(ellipse 65% 34% at 50% 82%, rgba(255, 222, 150, 0.9) 0%, rgba(255, 176, 96, 0.45) 42%, rgba(255, 150, 120, 0) 78%),
     linear-gradient(180deg, #1d2766 0%, #3b4a92 24%, #75679e 44%, #bd8080 62%, #eea574 74%, #ffc678 82%, #ffc678 100%);
 }
-#sky > [data-phase="day"] {
+#sky > [data-phase="morning"] {
   --g: #1c2a3c;
   background:
-    radial-gradient(circle at 82% 10%, rgba(255, 236, 170, 0.75) 0%, rgba(255, 224, 150, 0.3) 12%, rgba(255, 214, 140, 0) 28%),
+    radial-gradient(circle at 22% 14%, rgba(255, 236, 170, 0.75) 0%, rgba(255, 224, 150, 0.3) 12%, rgba(255, 214, 140, 0) 28%),
     linear-gradient(180deg, #1f5aa8 0%, #2e6cb5 28%, #4682c0 52%, #6a92bf 64%, #d9a46f 76%, #f0b265 84%, #f0b265 100%);
+}
+#sky > [data-phase="afternoon"] {
+  --g: #2a2230;
+  background:
+    radial-gradient(circle at 78% 16%, rgba(255, 214, 140, 0.8) 0%, rgba(255, 196, 120, 0.35) 13%, rgba(255, 180, 100, 0) 30%),
+    linear-gradient(180deg, #1b4f96 0%, #34669f 30%, #5d7aa6 50%, #b98368 64%, #e8914f 76%, #f19a45 84%, #f19a45 100%);
 }
 #sky > [data-phase="dusk"] {
   --g: #0c0810;
