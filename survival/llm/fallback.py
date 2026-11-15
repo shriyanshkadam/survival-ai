@@ -1,9 +1,9 @@
 import time
 from survival.llm.base import LLM, LLMUnavailable
 
-BASE_COOLDOWN= 60
-MAX_COOLDOWN= 900
-BROKEN_COOLDOWN= 1800
+BASE_COOLDOWN = 20
+MAX_COOLDOWN = 900
+BROKEN_COOLDOWN = 600
 
 class FallbackLLM(LLM):
     def __init__(self, providers, clock= time.monotonic):
@@ -19,13 +19,16 @@ class FallbackLLM(LLM):
                 continue
             try:
                 text= llm.generate(messages, temperature, max_tokens)
-            except LLMUnavailable:
+            except LLMUnavailable as e:
                 self.failures[i] += 1
-                wait = min(BASE_COOLDOWN * 2 ** (self.failures[i] - 1), MAX_COOLDOWN)
+                hint = getattr(e, "retry_after", None)
+                wait = min(hint + 1, MAX_COOLDOWN) if hint else min(BASE_COOLDOWN * 2 ** (self.failures[i] - 1), MAX_COOLDOWN)
                 self.blocked_until[i] = self.clock() + wait
+                print(f"[llm] {getattr(llm, 'name', '?')} busy, skipping for {wait:.0f}s ({e})", flush=True)
                 continue
-            except RuntimeError:
+            except RuntimeError as e:
                 self.blocked_until[i] = self.clock() + BROKEN_COOLDOWN
+                print(f"[llm] {getattr(llm, 'name', '?')} BROKEN, skipping for {BROKEN_COOLDOWN}s: {e}", flush=True)
                 continue
             self.failures[i] = 0
             self.last_used = getattr(llm, "name", type(llm).__name__)

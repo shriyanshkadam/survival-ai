@@ -13,6 +13,9 @@ def build_system_prompt():
         "You convert a survival-game player's action into JSON. "
         "Reply with ONLY one JSON object and no other text.\n"
         "Fields: description (string); requires (items the player must hold and keeps); "
+        "understood (true or false; false ONLY when the text has no real words at all, such as random keyboard letters; "
+        "if any word is readable, even for a silly, absurd or impossible action like eating a blanket, understood is true and you describe it normally; "
+        "when in doubt, true; when false, leave every other field empty); "
         "consumes (items used up); produces (items created); "
         "new_item_sizes (object mapping each new item name to a size class); "
         "ingests (short plain name of what the player eats or drinks, like 'energy bar', 'water', 'snow', 'berries'; otherwise empty); "
@@ -90,6 +93,8 @@ def extract_json(text):
     return json.loads(text)
 
 def check_types(data):
+    if not isinstance(data.get("understood", True), bool):
+        raise ValueError("understood must be true or false")
     if not isinstance(data, dict):
         raise ValueError("JSON must be an object")
     for name in ("requires", "consumes", "produces", "tags"):

@@ -15,6 +15,7 @@ from survival.engine.state import clamp
 @dataclass
 class Intent:
     description: str
+    understood: bool = True
     requires: list[str] = field(default_factory=list)
     consumes: list[str] = field(default_factory=list)
     produces: list[str] = field(default_factory=list)

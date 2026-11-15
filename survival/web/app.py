@@ -18,6 +18,7 @@ load_dotenv()
 
 app = FastAPI()
 llm = build_llm()
+print("Providers:", [p.name for p in llm.providers], flush=True)
 games = {}
 loggers = {}
 STATIC_DIR = Path(__file__).parent / "static"

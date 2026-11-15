@@ -33,3 +33,11 @@ def test_provider_outage_costs_no_turn():
     out = play_text(game, DownLLM(), "rest")
     assert out["ok"] is False
     assert game.state.turn == 0
+
+def test_gibberish_costs_no_turn():
+    game = Game(seed=1)
+    llm = MockLLM([json.dumps({"description": "none", "understood": False})])
+    out = play_text(game, llm, "sdasdawdasd")
+    assert out["ok"] is False
+    assert game.state.turn == 0
+    assert game.state.elapsed_minutes == 0

@@ -1,5 +1,22 @@
 import requests
+import re
+
 from survival.llm.base import LLM, LLMUnavailable
+
+
+class RateLimited(LLMUnavailable):
+    def __init__(self, message, retry_after=None):
+        super().__init__(message)
+        self.retry_after = retry_after
+
+
+def parse_seconds(text):
+    if not text:
+        return None
+    try:
+        return float(text)
+    except ValueError:
+        return None
 
 class OpenAICompatLLM(LLM):
     def __init__(self, name, base_url, api_key, model, extra=None, token_padding=0, timeout=20):
@@ -33,7 +50,8 @@ class OpenAICompatLLM(LLM):
         except requests.RequestException as e:
             raise LLMUnavailable(f"{self.name}: network error: {e}")
         if response.status_code == 429 or response.status_code >= 500:
-            raise LLMUnavailable(f"{self.name}: provider busy ({response.status_code})")
+            wait = parse_seconds(response.headers.get("retry-after"))
+            raise RateLimited(f"{self.name}: provider busy ({response.status_code})", wait)
         if response.status_code != 200:
             raise RuntimeError(f"{self.name} error {response.status_code}: {response.text[:200]}")
         try:

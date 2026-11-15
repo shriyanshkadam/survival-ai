@@ -31,6 +31,14 @@ def play_text(game, llm, player_text, logger=None):
             "narrative": "You can't make sense of your own plan. Try describing what you do.",
             "error": error,
         }
+    if not intent.understood:
+        record("not_understood", parser_model=parser_model)
+        return {
+            "ok": False,
+            "outcome": "rejected",
+            "narrative": "You mutter something, then realise it doesn't mean anything. Try describing what you do.",
+            "error": "not_understood",
+        }
     result = game.play_turn(intent, player_text)
     try:
         narrative = narrate(llm, game, intent, result, player_text)

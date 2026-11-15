@@ -47,3 +47,25 @@ def test_all_busy_raises():
     llm = FallbackLLM([Fake("a", fail=True), Fake("b", fail=True)])
     with pytest.raises(LLMUnavailable):
         llm.generate([])
+    
+def test_retry_after_sets_the_cooldown():
+    from survival.llm.openai_compat import RateLimited
+
+    class Limited(LLM):
+        def __init__(self):
+            self.calls = 0
+
+        def generate(self, messages, temperature=0.7, max_tokens=400):
+            self.calls += 1
+            raise RateLimited("busy", 5)
+
+    t = [0.0]
+    a, b = Limited(), Fake("b")
+    llm = FallbackLLM([a, b], clock=lambda: t[0])
+    llm.generate([])
+    t[0] = 3
+    llm.generate([])
+    assert a.calls == 1
+    t[0] = 7
+    llm.generate([])
+    assert a.calls == 2

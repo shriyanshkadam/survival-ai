@@ -10,7 +10,7 @@ An LLM-based survival simulator, where the engine rolls a scenario and LLM narra
 The workflow is: LLM proposes and the engine validates and rolls all the numbers.
 
 **STATUS** in development (started on 09/oct/2026, rebuild of an earlier prototype), Currently only runs locally
-**CURRENT VERSION** 0.0.0
+**CURRENT VERSION** 0.0.1
 
 ## Idea 
 In this game, the user is given a survival situation, the main goal of the user is to escape that situation without dying
