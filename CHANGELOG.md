@@ -1,5 +1,13 @@
 # Update log
 
+## v0.0.2 (Security Update)
+**MAIN FEATURE**
+- This version has deployed security guardrails which flags any innapropriate, self harm or jailbreak attempts.
+
+**VISUAL FEATURES**
+- Now low health causes a red vignette, intensity goes up as health drops
+- Low sanity corrupts texts, corruption of text increases as sanity drops
+
 ## v0.0.1
 **DEBUGGING FEATURE:**
 - Session transcript logging: A tool for debugging that creates a transcript file in the `data\logs` folder (off by default).
