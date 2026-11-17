@@ -25,7 +25,7 @@ class GameState:
     elapsed_minutes: int = 0
     food: float = 100.0
     water: float = 100.0
-    warmth: float = 100.0
+    temp: float = 50.0
     injury_info: dict = field(default_factory=dict)
 
     def used_space(self):
@@ -105,7 +105,7 @@ class GameState:
         self.sanity = clamp(self.sanity + sanity_delta)
         self.food = clamp(self.food + food_delta)
         self.water = clamp(self.water + water_delta)
-        self.warmth = clamp(self.warmth + warmth_delta)
+        self.temp = clamp(self.temp + temp_delta)
 
         self.item_sizes.update(pending)
         for item in remove_items:
@@ -139,6 +139,12 @@ class GameState:
             "phase": self.phase.value,
             "needs": {"food": self.food, "water": self.water, "warmth": self.warmth},
         }
+    
+    def lose_sanity(self, amount):
+        self.sanity = max(0, self.sanity - amount)
+        if self.sanity <= 0:
+            self.phase = Phase.DEAD
+
     def to_dict(self):
         return {
             "health": self.health,

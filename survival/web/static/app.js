@@ -38,7 +38,7 @@ function addEntry(playerText, narrative, cls) {
   logEl.scrollTop = logEl.scrollHeight;
   return text;
 }
-
+   
 function clockText(hour, phase) {
   let h = Math.floor(hour);
   let m = Math.round((hour - h) * 60);
@@ -65,6 +65,8 @@ function renderState(state) {
   }
   document.getElementById("nearby").textContent = "-";
   document.body.dataset.p = state.sky;
+  updateVignette(state.health);
+  currentSanity = state.sanity;
   for (const layer of document.querySelectorAll("#sky > div")) {
     layer.classList.toggle("on", layer.dataset.phase === state.sky);
   }
@@ -82,14 +84,15 @@ async function startGame() {
     document.getElementById("header").textContent = s.character + " · " + s.setting + " · " + s.cause;
     logEl.textContent = "";
     renderState(data.state);
-    addEntry(null, data.opening, "");
+    const openEl = addEntry(null, "", "");
+    setStoryText(openEl, data.opening, data.state.sanity);
     input.disabled = false;
     sendBtn.disabled = false;
     input.focus();
   } catch (e) {
     addEntry(null, "Could not start a game. " + e.message, "rejected");
   }
-}
+}    
 
 function endGame(phase) {
   input.disabled = true;
@@ -114,7 +117,8 @@ form.addEventListener("submit", async (event) => {
   const textEl = addEntry(text, "...", "");
   try {
     const out = await post("/api/turn", { game_id: gameId, text: text });
-    textEl.textContent = out.narrative;
+    if (out.ok) setStoryText(textEl, out.narrative, out.state.sanity);
+    else textEl.textContent = out.narrative;
     if (!out.ok) textEl.parentElement.classList.add("rejected");
     renderState(out.state);
     logEl.scrollTop = logEl.scrollHeight;
@@ -188,5 +192,77 @@ for (const layer of document.querySelectorAll("#sky > div")) {
   addClouds(layer, CLOUDS[phase]);
   if (phase === "night") addStars(layer);
 }
+
+const vignette = document.createElement("div");
+vignette.id = "vignette";
+document.body.appendChild(vignette);
+
+function updateVignette(health) {
+  const t = health >= 50 ? 0 : (50 - Math.max(health, 20)) / 30;
+  const strength = health >= 50 ? 0 : 0.2 + 0.8 * t;
+  vignette.style.setProperty("--vig", strength);
+  vignette.style.setProperty("--amp", 0.12 + 0.23 * t);
+  vignette.style.setProperty("--beat", (1.5 - 0.7 * t) + "s");
+}
+
+const GLITCH = "#%&@*█▒░▓§¤";
+
+function corruptionRate(sanity) {
+  if (sanity > 50) return 0;
+  return (5 + (50 - Math.max(sanity, 0)) * 0.5) / 100;
+}
+
+function corruptText(text, sanity) {
+  const rate = corruptionRate(sanity);
+  if (!rate) return text;
+  let out = "";
+  for (const ch of text) {
+    if (/[A-Za-z]/.test(ch) && Math.random() < rate) {
+      out += GLITCH[Math.floor(Math.random() * GLITCH.length)];
+    } else {
+      out += ch;
+    }
+  }
+  return out;
+}
+
+function setStoryText(el, text, sanity) {
+  el.textContent = "";
+  const rate = corruptionRate(sanity);
+  let plain = "";
+  for (const ch of text) {
+    if (rate && /[A-Za-z]/.test(ch) && Math.random() < rate) {
+      if (plain) { el.appendChild(document.createTextNode(plain)); plain = ""; }
+      const span = document.createElement("span");
+      span.className = "glitch";
+      span.dataset.real = ch;
+      span.textContent = GLITCH[Math.floor(Math.random() * GLITCH.length)];
+      el.appendChild(span);
+    } else {
+      plain += ch;
+    }
+  }
+  if (plain) el.appendChild(document.createTextNode(plain));
+}
+
+let currentSanity = 100;
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function flickerRate(sanity) {
+  const s = Math.min(Math.max(sanity, 0), 50);
+  return 0.4 + ((50 - s) / 50) * 2.6;
+}
+
+setInterval(() => {
+  if (reduceMotion) return;
+  const chance = flickerRate(currentSanity) * 0.1;
+  for (const span of document.querySelectorAll(".glitch")) {
+    if (Math.random() < chance) {
+      span.textContent = span.textContent === span.dataset.real
+        ? GLITCH[Math.floor(Math.random() * GLITCH.length)]
+        : span.dataset.real;
+    }
+  }
+}, 100);
 
 startGame();

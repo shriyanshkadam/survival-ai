@@ -68,8 +68,8 @@ RESTORE_AMOUNTS = {"small": 10, "medium": 25, "large": 45}
 INGEST_PROFILES = {
     "energy bar": {"food": 25},
     "water": {"water": 35},
-    "snow": {"water": 8, "warmth": -15},
-    "ice": {"water": 8, "warmth": -12},
+    "snow": {"water": 8, "temp": -15},
+    "ice": {"water": 8, "temp": -12},
     "berries": {"food": 8, "water": 3},
     "grubs": {"food": 8},
     "fish": {"food": 20},
@@ -222,3 +222,21 @@ BODY_PARTS = {
     "teeth": ("tooth", "teeth", "jaw"),
 }
 TIER_ORDER = ("minor", "moderate", "major", "critical")
+
+TEMP_MID = 50
+TEMP_COMFORT = (35, 65)
+TEMP_HARM = (15, 85)
+TEMP_DRIFT_PER_HOUR = 0.4
+TEMP_HARM_PER_HOUR = 8
+TEMP_COLD_FOOD_BONUS = 0.5
+TEMP_HOT_WATER_BONUS = 1.0
+SANITY_REGEN_PER_HOUR = 2
+
+AMBIENT_TEMP = {
+    "dense forest":      {"dawn": 35, "day": 55, "dusk": 40, "night": 28},
+    "desert highway":    {"dawn": 40, "day": 92, "dusk": 62, "night": 22},
+    "mountain ridge":    {"dawn": 15, "day": 38, "dusk": 20, "night": 5},
+    "snowy valley":      {"dawn": 5,  "day": 22, "dusk": 8,  "night": -8},
+    "frozen lake shore": {"dawn": 5,  "day": 22, "dusk": 8,  "night": -8},
+    "remote island":     {"dawn": 52, "day": 82, "dusk": 62, "night": 45},
+}

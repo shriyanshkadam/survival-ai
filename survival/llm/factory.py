@@ -16,13 +16,19 @@ PROVIDERS = [
      "meta-llama/llama-3.3-70b-instruct:free", {}, 0),
 ]
 
-
-def build_llm():
+def build_llm(order=None):
+    by_name = {p[0]: p for p in PROVIDERS}
+    names = order or [p[0] for p in PROVIDERS]
     providers = []
-    for name, url, key_var, model, extra, padding in PROVIDERS:
+    for name in names:
+        _, url, key_var, model, extra, padding = by_name[name]
         key = os.environ.get(key_var)
         if key:
             providers.append(OpenAICompatLLM(name, url, key, model, extra, padding))
     if not providers:
         raise ValueError("No API keys found. Set at least GROQ_API_KEY in .env")
     return FallbackLLM(providers)
+
+
+def build_guard_llm():
+    return build_llm(order=["groq-gpt-oss-120b", "groq-gpt-oss-20b"])
