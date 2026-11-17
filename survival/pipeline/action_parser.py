@@ -19,22 +19,20 @@ def build_system_prompt():
         "consumes (items used up); produces (items created); "
         "new_item_sizes (object mapping each new item name to a size class); "
         "ingests (short plain name of what the player eats or drinks, like 'energy bar', 'water', 'snow', 'berries'; otherwise empty); "
-        "only when the player eats or drinks something that is used up); "
         "minutes (whole number of minutes the action realistically takes, e.g. eating 5, searching an area 45, sleeping 360); "
-        
         "treats (exact name of an injury the player is treating, otherwise empty); "
+
         f"treatment (one of {list(INJURY_TREATMENTS)}, only together with treats); "
         f"tags (zero or more of {list(INJURY_TAGS)} that describe the action); "
-        "injury_effects (only if the action can cause a new injury: up to 3 objects "
+        'injury_effects (only if the action can cause a new injury: up to 3 objects {"hook": name, "value": number, "tags": [..]}, hooks: '
+        f"{list(INJURY_HOOKS)}; health_per_hour is blood loss or infection, fail_bonus makes risky "
+        "actions fail more, action_minutes_mult above 1 slows everything); "
         "effort (one of rest, light, normal, heavy: how physically hard the action is; "
         "jumping, running, climbing, digging and fighting are heavy); "
         "stress (one of none, low, medium, high: how disturbing or reckless the action is; "
         "calm sensible actions are none, risky or unpleasant ones low, frantic or gruesome ones medium, "
-        "self-destructive or terrifying ones high); "
-        '{"hook": name, "value": number, "tags": [..]}, hooks: '
-        f"{list(INJURY_HOOKS)}; health_per_hour is blood loss or infection, fail_bonus makes risky "
-        "actions fail more, action_minutes_mult above 1 slows everything); "
-        
+        "self-destructive or terrifying ones high);"
+
         f"risk (one of {list(RISK_FAIL_CHANCE)}); "
         f"harm (one of {list(INJURY_SEVERITY)}); "
         'injury (short injury name if it goes wrong, otherwise "").\n'
@@ -93,10 +91,10 @@ def extract_json(text):
     return json.loads(text)
 
 def check_types(data):
-    if not isinstance(data.get("understood", True), bool):
-        raise ValueError("understood must be true or false")
     if not isinstance(data, dict):
         raise ValueError("JSON must be an object")
+    if not isinstance(data.get("understood", True), bool):
+        raise ValueError("understood must be true or false")
     for name in ("requires", "consumes", "produces", "tags"):
         value = data.get(name, [])
         if not isinstance(value, list) or not all(isinstance(x, str) for x in value):
@@ -110,6 +108,8 @@ def check_types(data):
     sizes = data.get("new_item_sizes", {})
     if not isinstance(sizes, dict):
         raise ValueError("new_item_sizes must be an object")
+    if "minutes" in data and (isinstance(data["minutes"], bool) or not isinstance(data["minutes"], (int, float))):
+        raise ValueError("minutes must be a number")
 
 
 def parse_action(llm, player_text, state, max_retries=1):

@@ -16,6 +16,8 @@ The workflow is: LLM proposes and the engine validates and rolls all the numbers
 In this game, the user is given a survival situation, the main goal of the user is to escape that situation without dying
 To mitigate context window decay and long-term retention limits inherent in AI models, state management is handled directly by the backend engine rather than the AI. The backend operates as a deterministic state machine, holding ground-truth values to ensure consistency and prevent state drift across long sessions.
 
+## Live Version
+The live version is deployed on render on url: https://survival-ai-hlon.onrender.com
 
 ## Features
 - Please refer to [CHANGELOG.md](CHANGELOG.md) with all the updates and v0.0.0's features.
@@ -44,6 +46,14 @@ python -m pytest
 python -m uvicorn survival.web.app:app --reload
 ```
 Open http://127.0.0.1:8000
+
+## LLM based playtester for this project
+I have created a LLM based playtester which calls the game directly from the live game website and plays it for set amount of turns per set amount of games, It has a judging system which checks for any kind of bugs related to how the LLM and engine's outputs are coming out.
+This has been built because to outsource major part of bug testing to a LLM judge
+
+For Every major update's playtester report [Click Me](./playtester_logs)
+
+**PLAYTESTER's REPOSITORY:** [Here](https://github.com/shriyanshkadam/Survival-AI-Tester)
 
 
 ## Earlier prototype
