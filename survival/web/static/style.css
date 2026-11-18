@@ -187,7 +187,22 @@ button:hover { border-color: var(--tx); }
 #sanity-bar { background: var(--sanity); }
 #food-bar { background: #c9a23a; }
 #water-bar { background: #4aa3c9; }
-#warmth-bar { background: #d9783a; }
+.temp-bar {
+  position: relative;
+  overflow: visible;
+  background: linear-gradient(90deg, #9fd8ff 0%, #d8ecf5 45%, #ffd08a 70%, #ff9a3c 100%);
+}
+#temp-bobber {
+  position: absolute;
+  top: -3px;
+  width: 6px;
+  height: 14px;
+  background: #fff;
+  border-radius: 3px;
+  transform: translateX(-50%);
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
+  transition: left 0.3s;
+}
 
 #pack { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { border: 1px solid var(--bd); border-radius: 4px; padding: 2px 8px; font-size: 12px; }

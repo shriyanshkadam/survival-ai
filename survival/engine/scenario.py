@@ -1,8 +1,10 @@
 from dataclasses import dataclass
-from survival.engine.balance import (CARRY_CAPACITY, HAND_CAPACITY, INJURY_SEVERITY, MAX_START_INJURIES, MIN_START_HEALTH, SIZE_CLASSES, START_INJURY_WEIGHTS, START_SANITY, START_NEEDS, FOOD_DRAIN, WARMTH_DRAIN, WARMTH_PROTECTION, WATER_DRAIN)
+from survival.engine.balance import (CARRY_CAPACITY, HAND_CAPACITY, INJURY_SEVERITY, MAX_START_INJURIES, MIN_START_HEALTH, SIZE_CLASSES, START_INJURY_WEIGHTS, START_SANITY, START_NEEDS, FOOD_DRAIN, WATER_DRAIN, TEMP_MID)
 from survival.engine.scenario_data import CHARACTERS, START_INJURIES, CAUSE_WARMTH_HIT, CAUSE_HOURS_OUT,CHARACTER_SETTINGS, CHARACTER_CAUSES
 from survival.engine.state import GameState, clamp
 from survival.engine.injuries import make_info
+from survival.engine.clock import phase_of_day
+from survival.engine.needs import ambient
 
 @dataclass
 class Scenario:
@@ -54,8 +56,9 @@ def roll_scenario(rng):
     hours_out = rng.randint(*CAUSE_HOURS_OUT[cause])
     state.food = int(clamp(100 - FOOD_DRAIN * hours_out + rng.randint(-10, 10)))
     state.water = int(clamp(100 - WATER_DRAIN * hours_out + rng.randint(-10, 10)))
-    state.warmth = int(clamp(
-        100 - WARMTH_DRAIN.get(setting, {}).get("day", 2) * hours_out
-        - CAUSE_WARMTH_HIT.get(cause, 0) + rng.randint(-10, 10)
+    ambient_now = ambient(setting, phase_of_day(start_hour))
+    state.temp = int(clamp(
+        TEMP_MID + (ambient_now - TEMP_MID) * 0.5
+        - CAUSE_WARMTH_HIT.get(cause, 0) * 0.5 + rng.randint(-5, 5)
     ))
     return Scenario(character, setting, cause, state, start_hour, hours_out)

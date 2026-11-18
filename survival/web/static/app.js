@@ -52,7 +52,8 @@ function renderState(state) {
   document.getElementById("sanity-bar").style.width = state.sanity + "%";
   document.getElementById("food-bar").style.width = state.food + "%";
   document.getElementById("water-bar").style.width = state.water + "%";
-  document.getElementById("warmth-bar").style.width = state.warmth + "%";
+  document.getElementById("temp-bobber").style.left = state.temp + "%";
+  document.getElementById("temp-word").textContent = state.temp_word;
   document.getElementById("clock").textContent = clockText(state.hour, state.sky);
   document.getElementById("pack-label").textContent = "Pack " + state.used_space + " / " + state.capacity;
   const pack = document.getElementById("pack");

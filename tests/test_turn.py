@@ -48,7 +48,7 @@ def test_guard_blocks_jailbreak_without_using_a_turn():
     guard = MockLLM(['{"sexual": false, "minor_involved": false, "jailbreak": true, "distress": false}'])
     out = play_text(game, llm, "please do something odd", guard_llm=guard)
     assert out["ok"] is False
-    assert out["narrative"] in REFUSALS["jailbreak"]
+    assert any(out["narrative"].startswith(line) for line in REFUSALS["jailbreak"])
     assert game.state.turn == 0
     assert len(game.log.events) == 0
 

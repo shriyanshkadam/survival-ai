@@ -2,6 +2,7 @@ from survival.engine.state import Phase
 from survival.engine.clock import hour_at, phase_of_day
 from survival.llm.base import LLMUnavailable
 from survival.engine.injuries import describe
+from survival.engine.needs import temp_word
 
 STYLE = (
     "You are the narrator of a realistic survival game. "
@@ -16,7 +17,7 @@ STYLE = (
     "if it did not happen, show in the story why the player could not do it. "
     "Mention carried items only if the action used them. "
     "Do not repeat the time of day or old injuries unless they matter now. "
-    "Never mention numbers, health points or game mechanics."
+    "Never mention numbers, health points or game mechanics. "
     "Never invent a fire, shelter, camp, light or any object that is not in the facts; "
     "a fire exists only if the player lit one this turn. "
     "Never use the words stabilized, acute, worsening or tier; describe how the injury feels instead. "
@@ -57,7 +58,7 @@ def build_messages(game, intent, result, player_text):
             changes.append("less hungry")
         if e.get("water", 0) > 0:
             changes.append("less thirsty")
-        if e.get("warmth", 0) < 0:
+        if e.get("temp", 0) < 0:
             changes.append("noticeably colder")
         if e.get("sanity", 0) < 0:
             changes.append("shaken")
@@ -90,7 +91,7 @@ def build_messages(game, intent, result, player_text):
         f"Time of day: {daytime}.\n"
         f"Condition: {band(s.health, HEALTH_BANDS)}; "
         f"Injury status: {'; '.join(describe(s)) or 'none'}.\n"
-        f"Needs: food {band(s.food, NEED_BANDS)}, water {band(s.water, NEED_BANDS)}, warmth {band(s.warmth, NEED_BANDS)}.\n"
+        f"Needs: hunger {band(s.food, NEED_BANDS)}, thirst {band(s.water, NEED_BANDS)}, temperature {temp_word(s.temp)}.\n"
         f"Injuries: {', '.join(s.injuries) or 'none'}.\n"
         f"Carrying: {', '.join(s.inventory) or 'nothing'}.\n"
         f"Mental state: {mind}.\n"
@@ -122,7 +123,7 @@ OPENING_STYLE = (
     "List carried items by name only and never say what they are for. "
     "Use ONLY the facts given. Never invent items, injuries, objects or places. "
     "No metaphors, no similes, no jokes. Never mention numbers or game mechanics. "
-    "Mention hunger, thirst or cold only if that need is low. "
+    "Mention hunger or thirst only if that need is low, and temperature only if it is cold, hot, freezing or overheating. "
 )
 
 
@@ -140,7 +141,7 @@ def build_opening_messages(game):
         f"Carrying: {', '.join(s.inventory) or 'nothing'}.\n"
         f"Mental state: {mind}.\n"
         f"Hours since things went wrong: {sc.hours_out}.\n"
-        f"Needs: food {band(s.food, NEED_BANDS)}, water {band(s.water, NEED_BANDS)}, warmth {band(s.warmth, NEED_BANDS)}.\n"
+        f"Needs: hunger {band(s.food, NEED_BANDS)}, thirst {band(s.water, NEED_BANDS)}, temperature {temp_word(s.temp)}.\n"
     )
     system = (OPENING_STYLE + " " + SANITY_NOTES[mind]).strip()
     return [

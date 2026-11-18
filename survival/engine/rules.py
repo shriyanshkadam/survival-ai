@@ -10,7 +10,7 @@ from survival.engine.injuries import (
 from survival.engine.items import match_key
 from survival.engine.needs import upkeep
 from survival.engine.state import clamp
-
+            
 
 @dataclass
 class Intent:
@@ -118,7 +118,7 @@ def resolve(state, intent, rng, env=None):
         result = state.apply(
             health_delta=-damage + drain["health"],
             sanity_delta=drain["sanity"] - stress,
-            food_delta=drain["food"], water_delta=drain["water"], warmth_delta=drain["warmth"],
+            food_delta=drain["food"], water_delta=drain["water"], temp_delta=drain["temp"],
             add_injuries=names, heal_injuries=heal, injury_profiles=profiles, minutes=minutes,
         )
         if result["ok"]:
@@ -139,7 +139,7 @@ def resolve(state, intent, rng, env=None):
             sanity_delta=drain["sanity"] + effects.get("sanity", 0) - stress,
             food_delta=drain["food"] + effects.get("food", 0),
             water_delta=drain["water"] + effects.get("water", 0),
-            warmth_delta=drain["warmth"] + effects.get("warmth", 0),
+            temp_delta=drain["temp"] + effects.get("temp", 0),
             add_injuries=new_injuries,
             injury_profiles=profiles,
             stabilize_injuries=[intent.treats] if intent.treats else [],
@@ -162,3 +162,4 @@ def resolve(state, intent, rng, env=None):
     else:
         result["outcome"] = "failure" if (failed or missed) else "success"
     return result
+

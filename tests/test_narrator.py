@@ -42,3 +42,11 @@ def test_low_sanity_changes_the_style_prompt():
 def test_opening_uses_llm_text():
     game = Game(seed=1)
     assert narrate_opening(MockLLM(["You wake up cold."]), game) == "You wake up cold."
+
+
+def test_temperature_word_reaches_the_prompt():
+    game, intent, result = make()
+    game.state.temp = 95
+    llm = MockLLM(["ok"])
+    narrate(llm, game, intent, result, "rest")
+    assert "overheating" in llm.calls[0]["messages"][1]["content"]

@@ -15,6 +15,7 @@ from fastapi.staticfiles import StaticFiles
 from survival.pipeline.narrator import fallback_opening, narrate_opening
 from survival.pipeline.session_log import SessionLogger
 from survival.version import VERSION
+from survival.engine.needs import temp_word
 
 load_dotenv()
 
@@ -60,6 +61,7 @@ def snapshot(game):
         "hour": round(hour, 2),
         "phase_of_day": phase_of_day(hour),
         "sky": sky_phase(hour),
+        "temp_word": temp_word(state.temp),
     }
 
 @app.get("/api/ping")

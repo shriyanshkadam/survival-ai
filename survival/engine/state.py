@@ -49,7 +49,7 @@ class GameState:
     def apply(self, health_delta= 0, sanity_delta= 0,
               add_items=(), remove_items=(),
               add_injuries=(), heal_injuries=(), new_item_sizes=None, minutes=0,
-              food_delta=0, water_delta=0, warmth_delta=0,
+              food_delta=0, water_delta=0, temp_delta=0,
               injury_profiles=None, stabilize_injuries=()
             ):
         
@@ -137,7 +137,7 @@ class GameState:
             "sanity": (sanity_before, self.sanity),
             "rejected": rejected,
             "phase": self.phase.value,
-            "needs": {"food": self.food, "water": self.water, "warmth": self.warmth},
+            "needs": {"food": self.food, "water": self.water, "temp": self.temp},
         }
     
     def lose_sanity(self, amount):
@@ -158,7 +158,7 @@ class GameState:
             "elapsed_minutes": self.elapsed_minutes,
             "food": self.food,
             "water": self.water,
-            "warmth": self.warmth,
+            "temp": self.temp,
             "injury_info": copy.deepcopy(self.injury_info),
         }
 
@@ -176,7 +176,7 @@ class GameState:
             elapsed_minutes= data.get("elapsed_minutes", 0),
             food= data.get("food", 100.0),
             water= data.get("water", 100.0),
-            warmth= data.get("warmth", 100.0),
+            temp= data.get("temp", 50.0),
             injury_info= copy.deepcopy(data.get("injury_info", {})),
             )
 
